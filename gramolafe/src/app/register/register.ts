@@ -22,30 +22,35 @@ export class Register {
   constructor(private service : User) { }
 
   registrar() {
-    if (this.pwd1 != this.pwd2) {
-      console.error('Las contraseñas no coinciden');
-      return;
-    }
-
-    if (!this.email || !this.pwd1 || !this.pwd2 || !this.bar || !this.clientId || !this.clientSecret) {
-      console.error('Por favor, rellena todos los campos');
-      return;
-    }
-
-    this.service.register(
-      this.email, 
-      this.pwd1, 
-      this.pwd2, 
-      this.bar, 
-      this.clientId, 
-      this.clientSecret
-    ).subscribe(
-      ok => {
-        console.log('Registro exitoso', ok);
-      },
-      error => {
-        console.error('Error en el registro', error);
-      }
-    );
+  // 1. Comprobar contraseñas
+  if (this.pwd1 != this.pwd2) {
+    alert('Las contraseñas no coinciden'); // <--- CAMBIO AQUÍ
+    return;
   }
+
+  // 2. Comprobar campos vacíos
+  if (!this.email || !this.pwd1 || !this.pwd2 || !this.bar || !this.clientId || !this.clientSecret) {
+    alert('Por favor, rellena todos los campos'); // <--- CAMBIO AQUÍ
+    return;
+  }
+
+  // 3. Enviar al servidor
+  this.service.register(
+    this.email, 
+    this.pwd1, 
+    this.pwd2, 
+    this.bar, 
+    this.clientId, 
+    this.clientSecret
+  ).subscribe({
+    next: (ok) => {
+      console.log('Registro exitoso', ok);
+      alert('¡Registro recibido! Revisa la consola de Java para ver el link de confirmación.');
+    },
+    error: (error) => {
+      console.error('Error en el registro', error);
+      alert('Error al registrar: ' + (error.error?.message || 'Error desconocido'));
+    }
+  });
+}
 }

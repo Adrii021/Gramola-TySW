@@ -40,7 +40,7 @@ public class UserController {
         if(!pwd1.equals(pwd2)) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Passwords do not match");
         }
-        if(pwd1.length() < 8) {
+        if(pwd1.length() < 8) { // <--- ¡AQUÍ ESTÁ EL PROBLEMA!
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Password must be at least 8 characters");
         }
         if(!email.contains("@") || !email.contains(".")) {
