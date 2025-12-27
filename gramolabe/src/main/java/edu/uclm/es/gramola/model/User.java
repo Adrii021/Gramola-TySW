@@ -10,19 +10,23 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 
-
 @Entity
 public class User {
     @Id
     private String email;
     private String pwd;
+    
+    // Campos añadidos para la práctica Gramola
+    private String bar;
+    private String clientId;
+    private String clientSecret;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, optional = false)
     @JoinColumn(name = "creation_token_id", referencedColumnName = "id")
     private Token creationToken;
 
     public void setPwd(String pwd) {
-        this.pwd = this.encryptPassword(pwd);  //Guardarla encriptada
+        this.pwd = this.encryptPassword(pwd);
     }
 
     public String getPwd() {
@@ -35,6 +39,30 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getBar() {
+        return bar;
+    }
+
+    public void setBar(String bar) {
+        this.bar = bar;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
     }
 
     public void setCreationToken(Token token) {
@@ -69,5 +97,4 @@ public class User {
             throw new RuntimeException("Error al encriptar la contraseña", e);
         }
     }
-
 }

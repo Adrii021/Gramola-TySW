@@ -5,17 +5,19 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class User {
-  private apiUrl = ' http://localhost:8080/users/register';
+  private apiUrl = 'http://localhost:8080/users/register'; // He quitado el espacio extra al inicio de la URL
 
   constructor(private http: HttpClient) {}
 
-  register(email : string, pwd1 : string, pwd2 : string) {
+  register(email: string, pwd1: string, pwd2: string, bar: string, clientId: string, clientSecret: string) {
     let info = {
-      email : email,
-      pwd1 : pwd1, 
-      pwd2 : pwd2
+      email: email,
+      pwd1: pwd1,
+      pwd2: pwd2,
+      bar: bar,
+      clientId: clientId,
+      clientSecret: clientSecret
     }
     return this.http.post<any>(this.apiUrl, info);
   }
 }
-

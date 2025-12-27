@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // Importa CommonModule
+import { CommonModule } from '@angular/common'; 
 import { FormsModule } from '@angular/forms'; 
 import { User } from '../user';
 
@@ -15,6 +15,9 @@ export class Register {
   email? : string
   pwd1? : string
   pwd2? : string
+  bar? : string
+  clientId? : string
+  clientSecret? : string
 
   constructor(private service : User) { }
 
@@ -24,7 +27,19 @@ export class Register {
       return;
     }
 
-    this.service.register(this.email!, this.pwd1!, this.pwd2!).subscribe(
+    if (!this.email || !this.pwd1 || !this.pwd2 || !this.bar || !this.clientId || !this.clientSecret) {
+      console.error('Por favor, rellena todos los campos');
+      return;
+    }
+
+    this.service.register(
+      this.email, 
+      this.pwd1, 
+      this.pwd2, 
+      this.bar, 
+      this.clientId, 
+      this.clientSecret
+    ).subscribe(
       ok => {
         console.log('Registro exitoso', ok);
       },
@@ -34,5 +49,3 @@ export class Register {
     );
   }
 }
-
-
