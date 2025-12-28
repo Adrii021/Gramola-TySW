@@ -20,4 +20,9 @@ export class User {
     }
     return this.http.post<any>(this.apiUrl, info);
   }
+
+  login(email: string, pwd: string) {
+      let info = { email: email, pwd: pwd };
+      return this.http.post<any>('http://localhost:8080/users/login', info);
+  }
 }

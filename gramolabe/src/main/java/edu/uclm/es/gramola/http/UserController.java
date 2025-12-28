@@ -3,9 +3,7 @@ package edu.uclm.es.gramola.http;
 import java.io.IOException;
 import java.util.Map;
 
-import jakarta.servlet.http.HttpServletResponse; // Importante añadir esto
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired; // Importante añadir esto
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,10 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import edu.uclm.es.gramola.model.User;
 import edu.uclm.es.gramola.services.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("users")
+@CrossOrigin("*")
 public class UserController {
 
     @Autowired
@@ -62,5 +63,10 @@ public class UserController {
         response.sendRedirect("http://localhost:4200/payment?token=" + token);
     }
 
-    //HACER LOGIN
+    @PostMapping("/login")
+    public User login(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        String pwd = body.get("pwd");
+        return this.service.login(email, pwd);
+    }
 }

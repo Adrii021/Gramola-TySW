@@ -3,6 +3,8 @@ package edu.uclm.es.gramola.model;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -21,8 +23,10 @@ public class User {
     private String clientId;
     private String clientSecret;
 
+    // AQUÍ EL CAMBIO: Añadimos @JsonIgnore para que no falle al enviar al frontend 👇
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, optional = false)
     @JoinColumn(name = "creation_token_id", referencedColumnName = "id")
+    @JsonIgnore
     private Token creationToken;
 
     public void setPwd(String pwd) {

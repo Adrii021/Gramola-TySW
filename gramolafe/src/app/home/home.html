@@ -1,0 +1,28 @@
+<div style="padding: 20px;">
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+        <h1 style="color: #5469d4; margin: 0;">🎵 Gramola</h1>
+        <button (click)="logout()" style="width: auto; background-color: #e53e3e; margin: 0; padding: 8px 16px;">
+            Cerrar Sesión
+        </button>
+    </header>
+
+    <div class="form-card" style="max-width: 800px; margin: 0 auto; text-align: center;">
+        <h2 style="font-size: 32px;">Hola, {{ barName }} 👋</h2>
+        <p style="color: #666; font-size: 18px;">Bienvenido a tu panel de control.</p>
+        
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div style="padding: 20px; background: #f7f9fc; border-radius: 8px;">
+                <h3>📜 Lista de Reproducción</h3>
+                <p>Gestiona qué suena ahora mismo.</p>
+                <button style="background: #333;">Ver Lista</button>
+            </div>
+            <div style="padding: 20px; background: #f7f9fc; border-radius: 8px;">
+                <h3>⚙️ Configuración</h3>
+                <p>Ajusta tus preferencias.</p>
+                <button style="background: #333;">Editar</button>
+            </div>
+        </div>
+    </div>
+</div>

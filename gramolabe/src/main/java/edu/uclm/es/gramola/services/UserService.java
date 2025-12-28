@@ -7,10 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import edu.uclm.es.gramola.model.Token;
-import edu.uclm.es.gramola.model.User;
 import edu.uclm.es.gramola.dao.TokenDao;
 import edu.uclm.es.gramola.dao.UserDao;
+import edu.uclm.es.gramola.model.Token;
+import edu.uclm.es.gramola.model.User;
 
 @Service
 public class UserService {
@@ -80,4 +80,28 @@ public class UserService {
         userToken.use();
         this.userDao.save(user); 
     }
+
+    public User login(String email, String pwd) {
+    Optional<User> optUser = this.userDao.findById(email);
+    
+    // 1. ¿Existe el usuario?
+    if (optUser.isEmpty()) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Credenciales incorrectas");
+    }
+    User user = optUser.get();
+    
+    // 2. ¿Coincide la contraseña? (Encriptándola antes de comparar)
+    // NOTA: Asegúrate de que tu clase User tiene el método encryptPassword. 
+    // Si no, usa: if (!user.getPwd().equals(pwd))
+    if (!user.getPwd().equals(user.encryptPassword(pwd))) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Credenciales incorrectas");
+    }
+    
+    // 3. ¿Ha completado el pago? (El token debe estar usado)
+    if (!user.getCreationToken().isUsed()) {
+        throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, "Debes completar el pago antes de entrar");
+    }
+    
+    return user;
+}
 }
