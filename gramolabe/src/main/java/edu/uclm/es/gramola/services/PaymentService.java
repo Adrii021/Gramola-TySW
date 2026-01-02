@@ -14,7 +14,6 @@ import edu.uclm.es.gramola.model.StripeTransaction;
 public class PaymentService {
 
     static {
-        // Clave de prueba del documento
         Stripe.apiKey = "sk_test_51SixjzR3ux91c7im0WOIr1M0L5MrJMSSHXCN1dgck9h5revqtadhqIs8hV54S3OJqnyt8hzAE6UEKYfz42uDuGvC008kB8FW5T";
     }
 

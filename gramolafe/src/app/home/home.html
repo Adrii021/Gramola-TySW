@@ -8,20 +8,90 @@
 
     <div class="form-card" style="max-width: 800px; margin: 0 auto; text-align: center;">
         <h2 style="font-size: 32px;">Hola, {{ barName }} 👋</h2>
-        <p style="color: #666; font-size: 18px;">Bienvenido a tu panel de control.</p>
         
+        <div style="margin: 30px 0;">
+            <input type="text" [(ngModel)]="query" placeholder="Buscar canción o artista..." 
+                   (keyup.enter)="search()"
+                   style="padding: 10px; width: 60%; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px;">
+            
+            <button (click)="search()" style="width: auto; padding: 10px 20px;">
+                🔍 Buscar
+            </button>
+        </div>
+
+        <div *ngIf="tracks.length > 0 && !showingPlaylist" style="text-align: left; margin-top: 20px;">
+            <h3>Resultados de la búsqueda:</h3>
+            <div *ngFor="let track of tracks" 
+                 style="background: #f7f9fc; padding: 10px; margin-bottom: 10px; border-radius: 6px; display: flex; align-items: center;">
+                
+                <img *ngIf="track.album?.images[0]" [src]="track.album.images[0].url" width="50" style="margin-right: 15px; border-radius: 4px;">
+                
+                <div>
+                    <strong style="display: block; font-size: 16px;">{{ track.name }}</strong>
+                    <span style="color: #666;">{{ track.artists[0].name }}</span>
+                </div>
+                
+                <button (click)="add(track)" 
+                        style="margin-left: auto; width: auto; font-size: 14px; background: #28a745; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px;">
+                    ➕ Añadir
+                </button>
+            </div>
+        </div>
+
+        <div *ngIf="showingPlaylist" style="text-align: left; margin-top: 20px;">
+            <h3 style="color: #5469d4;">📜 Tu Lista de Reproducción:</h3>
+            
+            <p *ngIf="playlist.length === 0" style="color: #888; font-style: italic;">
+                La lista está vacía. ¡Añade algunas canciones!
+            </p>
+
+            <div *ngFor="let item of playlist; let i = index" 
+                 style="background: #fff; border: 1px solid #eee; padding: 15px; margin-bottom: 15px; border-radius: 8px;">
+                
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <span style="font-weight: bold; color: #ccc; margin-right: 15px; font-size: 20px;">#{{ i + 1 }}</span>
+
+                    <img *ngIf="item.album?.images[0]" [src]="item.album.images[0].url" width="40" style="margin-right: 15px; border-radius: 4px;">
+                    
+                    <div style="flex-grow: 1;">
+                        <strong style="display: block; font-size: 16px;">{{ item.name }}</strong>
+                        <span style="color: #666;">{{ item.artists[0].name }}</span>
+                    </div>
+
+                    <button (click)="remove(item.id)" 
+                            style="background: #fff; border: 1px solid #e53e3e; color: #e53e3e; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 16px;"
+                            title="Borrar canción">
+                        🗑️
+                    </button>
+                </div>
+
+                <iframe [src]="getEmbedUrl(item.id)" 
+                        width="100%" 
+                        height="80" 
+                        frameBorder="0" 
+                        allow="encrypted-media" 
+                        style="border-radius: 12px;">
+                </iframe>
+            </div>
+        </div>
+
         <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;">
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
             <div style="padding: 20px; background: #f7f9fc; border-radius: 8px;">
                 <h3>📜 Lista de Reproducción</h3>
                 <p>Gestiona qué suena ahora mismo.</p>
-                <button style="background: #333;">Ver Lista</button>
+                <button (click)="openPlaylist()" style="background: #333; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px;">
+                    Ver Lista
+                </button>
             </div>
+            
             <div style="padding: 20px; background: #f7f9fc; border-radius: 8px;">
                 <h3>⚙️ Configuración</h3>
                 <p>Ajusta tus preferencias.</p>
-                <button style="background: #333;">Editar</button>
+                <button style="background: #333; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px;">
+                    Editar
+                </button>
             </div>
         </div>
     </div>
