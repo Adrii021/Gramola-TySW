@@ -39,7 +39,7 @@
         </div>
 
         <div *ngIf="showingPlaylist" style="text-align: left; margin-top: 20px;">
-            <h3 style="color: #5469d4;">📜 Tu Lista de Reproducción:</h3>
+            <h3 style="color: #5469d4;">📜 Tu Lista de Reproducción (Guardada):</h3>
             
             <p *ngIf="playlist.length === 0" style="color: #888; font-style: italic;">
                 La lista está vacía. ¡Añade algunas canciones!
@@ -51,21 +51,21 @@
                 <div style="display: flex; align-items: center; margin-bottom: 10px;">
                     <span style="font-weight: bold; color: #ccc; margin-right: 15px; font-size: 20px;">#{{ i + 1 }}</span>
 
-                    <img *ngIf="item.album?.images[0]" [src]="item.album.images[0].url" width="40" style="margin-right: 15px; border-radius: 4px;">
+                    <img *ngIf="item.imageUrl" [src]="item.imageUrl" width="40" style="margin-right: 15px; border-radius: 4px;">
                     
                     <div style="flex-grow: 1;">
                         <strong style="display: block; font-size: 16px;">{{ item.name }}</strong>
-                        <span style="color: #666;">{{ item.artists[0].name }}</span>
+                        <span style="color: #666;">{{ item.artist }}</span>
                     </div>
 
-                    <button (click)="remove(item.id)" 
+                    <button (click)="remove(item.spotifyId)" 
                             style="background: #fff; border: 1px solid #e53e3e; color: #e53e3e; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 16px;"
                             title="Borrar canción">
                         🗑️
                     </button>
                 </div>
 
-                <iframe [src]="getEmbedUrl(item.id)" 
+                <iframe [src]="getEmbedUrl(item.spotifyId)" 
                         width="100%" 
                         height="80" 
                         frameBorder="0" 
