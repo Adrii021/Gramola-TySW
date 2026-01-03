@@ -3,7 +3,7 @@ package edu.uclm.es.gramola.http;
 import java.io.IOException;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired; // Importante añadir esto
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,7 +41,7 @@ public class UserController {
         if(!pwd1.equals(pwd2)) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Passwords do not match");
         }
-        if(pwd1.length() < 8) { // <--- ¡AQUÍ ESTÁ EL PROBLEMA!
+        if(pwd1.length() < 8) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Password must be at least 8 characters");
         }
         if(!email.contains("@") || !email.contains(".")) {
@@ -59,7 +59,6 @@ public class UserController {
     @GetMapping("/confirm/Token/{email}")
     public void confirmToken(@PathVariable String email, @RequestParam String token, HttpServletResponse response) throws IOException {
         this.service.confirmToken(email, token);
-        // Redirige al frontend (Angular) pasando el token para el siguiente paso (pago)
         response.sendRedirect("http://localhost:4200/payment?token=" + token);
     }
 
@@ -68,5 +67,21 @@ public class UserController {
         String email = body.get("email");
         String pwd = body.get("pwd");
         return this.service.login(email, pwd);
+    }
+
+    // 👇 ESTE ES EL MÉTODO QUE FALTABA
+    @PostMapping("/update")
+    public User update(@RequestBody Map<String, String> info) {
+        String email = info.get("userId");
+        String name = info.get("name");
+        String pwd = info.get("password");
+        
+        // Llamamos al servicio para actualizar
+        User updatedUser = this.service.updateUser(email, name, pwd);
+        
+        if (updatedUser == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
+        }
+        return updatedUser;
     }
 }

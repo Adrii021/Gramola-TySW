@@ -21,8 +21,6 @@ public class UserService {
     @Autowired
     private TokenDao tokenDao;
 
-    // Eliminamos el mapa 'users' porque usamos la base de datos
-
     public void register(String email, String pwd, String bar, String clientId, String clientSecret) {
         Optional<User> optUser = this.userDao.findById(email);
         if (optUser.isEmpty()) {
@@ -38,8 +36,6 @@ public class UserService {
             user.setCreationToken(token);
             this.userDao.save(user);
             
-            // --- SIMULACIÓN DE ENVÍO DE CORREO ---
-            // Imprimimos el enlace en la consola de Java para que puedas hacer clic y probarlo
             System.out.println("----------------------------------------------------------------");
             System.out.println("CORREO SIMULADO PARA: " + email);
             System.out.println("Para confirmar tu cuenta haz clic aquí:");
@@ -56,7 +52,6 @@ public class UserService {
     }
 
     public void confirmToken(String email, String token) {
-        // CORRECCIÓN: Buscamos en la base de datos, no en un mapa en memoria
         Optional<User> optUser = this.userDao.findById(email);
         
         if (optUser.isEmpty()) {
@@ -76,32 +71,44 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.GONE, "Token ya usado");
         }
         
-        // Marcamos el token como usado y guardamos el cambio en la BD
         userToken.use();
         this.userDao.save(user); 
     }
 
     public User login(String email, String pwd) {
-    Optional<User> optUser = this.userDao.findById(email);
-    
-    // 1. ¿Existe el usuario?
-    if (optUser.isEmpty()) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Credenciales incorrectas");
+        Optional<User> optUser = this.userDao.findById(email);
+        
+        if (optUser.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Credenciales incorrectas");
+        }
+        User user = optUser.get();
+        
+        if (!user.getPwd().equals(user.encryptPassword(pwd))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Credenciales incorrectas");
+        }
+        
+        if (!user.getCreationToken().isUsed()) {
+            throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, "Debes completar el pago antes de entrar");
+        }
+        
+        return user;
     }
-    User user = optUser.get();
-    
-    // 2. ¿Coincide la contraseña? (Encriptándola antes de comparar)
-    // NOTA: Asegúrate de que tu clase User tiene el método encryptPassword. 
-    // Si no, usa: if (!user.getPwd().equals(pwd))
-    if (!user.getPwd().equals(user.encryptPassword(pwd))) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Credenciales incorrectas");
+
+    // 👇 AQUÍ ESTABA EL ERROR: Usamos setBar en vez de setName
+    public User updateUser(String email, String newName, String newPassword) {
+        User user = this.userDao.findById(email).orElse(null);
+        if (user == null) return null;
+
+        // Actualizamos el nombre del bar
+        if (newName != null && !newName.isEmpty()) {
+            user.setBar(newName); // <--- CAMBIO: setBar
+        }
+
+        // Actualizamos la contraseña
+        if (newPassword != null && !newPassword.isEmpty()) {
+            user.setPwd(newPassword);
+        }
+
+        return this.userDao.save(user);
     }
-    
-    // 3. ¿Ha completado el pago? (El token debe estar usado)
-    if (!user.getCreationToken().isUsed()) {
-        throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, "Debes completar el pago antes de entrar");
-    }
-    
-    return user;
-}
 }

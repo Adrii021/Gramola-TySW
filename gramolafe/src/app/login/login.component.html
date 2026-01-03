@@ -1,19 +1,38 @@
-<div class="form-card">
+<div class="auth">
+  <div class="auth-card">
     <h2>Bienvenido de nuevo</h2>
-    <p style="text-align: center; color: #666; margin-top: -15px; margin-bottom: 30px;">
-        Gestiona la música de tu bar
+
+    <p class="subtitle">
+      Gestiona la música de tu bar
     </p>
 
-    <label for="email">Correo electrónico</label>
-    <input type="email" [(ngModel)]="email" name="email" placeholder="tu@email.com">
-    
-    <label for="pwd">Contraseña</label>
-    <input type="password" [(ngModel)]="pwd" name="pwd" placeholder="Tu contraseña">
-    
-    <button (click)="login()">Iniciar Sesión</button>
-
-    <div style="text-align: center; margin-top: 20px; font-size: 14px;">
-        <span style="color: #666;">¿No tienes cuenta? </span>
-        <a routerLink="/register" style="color: #5469d4; text-decoration: none; font-weight: 600;">Regístrate</a>
+    <div class="field">
+      <label for="email">Correo electrónico</label>
+      <input
+        type="email"
+        [(ngModel)]="email"
+        name="email"
+        placeholder="tu@email.com"
+      />
     </div>
+
+    <div class="field">
+      <label for="pwd">Contraseña</label>
+      <input
+        type="password"
+        [(ngModel)]="pwd"
+        name="pwd"
+        placeholder="Tu contraseña"
+      />
+    </div>
+
+    <button class="btn-primary" (click)="login()">
+      Iniciar sesión
+    </button>
+
+    <div class="auth-footer">
+      <span>¿No tienes cuenta?</span>
+      <a routerLink="/register">Regístrate</a>
+    </div>
+  </div>
 </div>

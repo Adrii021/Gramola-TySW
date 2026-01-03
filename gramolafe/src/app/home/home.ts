@@ -20,6 +20,12 @@ export class HomeComponent implements OnInit {
   playlist: any[] = [];
   showingPlaylist: boolean = false;
 
+  showingSettings: boolean = false; 
+  editData = {
+    name: '',
+    password: ''
+  };
+
   constructor(
     private router: Router, 
     private http: HttpClient, 
@@ -30,7 +36,7 @@ export class HomeComponent implements OnInit {
     const userJson = localStorage.getItem('currentUser');
     if (userJson) {
       const user = JSON.parse(userJson);
-      this.barName = user.bar;
+      this.barName = user.name || user.bar || "Usuario"; 
       this.refreshPlaylistData(); 
     } else {
       this.router.navigate(['/login']);
@@ -49,7 +55,7 @@ export class HomeComponent implements OnInit {
 
     let info = {
       query: this.query,
-      userId: user.email
+      userId: user.email 
     };
 
     this.showingPlaylist = false;
@@ -82,6 +88,7 @@ export class HomeComponent implements OnInit {
 
   openPlaylist() {
     this.showingPlaylist = true;
+    this.showingSettings = false; 
     this.refreshPlaylistData();
   }
 
@@ -99,12 +106,10 @@ export class HomeComponent implements OnInit {
   }
 
   getEmbedUrl(trackId: string): SafeResourceUrl {
-    // URL oficial de Spotify para incrustar
     const url = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
   }
 
-  // 👇 ESTA ES LA FUNCIÓN QUE TE FALTABA
   remove(trackId: string) {
     const userJson = localStorage.getItem('currentUser');
     if (!userJson) return;
@@ -114,7 +119,7 @@ export class HomeComponent implements OnInit {
 
     let info = {
       userId: user.email,
-      trackId: trackId
+      trackId: trackId 
     };
 
     this.http.post("http://localhost:8080/music/remove", info).subscribe({
@@ -123,5 +128,43 @@ export class HomeComponent implements OnInit {
       },
       error: (err) => alert("Error al borrar: " + err.message)
     });
+  }
+
+  openSettings() {
+    this.showingSettings = true;
+    this.showingPlaylist = false; 
+    this.tracks = []; 
+
+    this.editData.name = this.barName;
+    this.editData.password = ""; 
+  }
+
+  saveSettings() {
+    const userJson = localStorage.getItem('currentUser');
+    if (!userJson) return;
+    const user = JSON.parse(userJson);
+
+    let info = {
+      userId: user.email,
+      name: this.editData.name,
+      password: this.editData.password
+    };
+
+    // 👇 CAMBIO AQUÍ: La URL correcta es /users/update
+    this.http.post("http://localhost:8080/users/update", info).subscribe({
+      next: (updatedUser: any) => {
+        alert("¡Datos actualizados!");
+        
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+        this.barName = updatedUser.name || updatedUser.bar; 
+        
+        this.showingSettings = false; 
+      },
+      error: (err) => alert("Error al actualizar: " + err.message)
+    });
+  }
+
+  cancelSettings() {
+    this.showingSettings = false;
   }
 }
