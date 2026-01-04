@@ -20,6 +20,9 @@ export class HomeComponent implements OnInit {
   playlist: any[] = [];
   showingPlaylist: boolean = false;
 
+  // 🔊 NUEVO: canción que se está reproduciendo
+  currentPlayingId: string | null = null;
+
   showingSettings: boolean = false; 
   editData = {
     name: '',
@@ -105,6 +108,11 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  // 🔊 NUEVO: reproducir canción
+  play(trackId: string) {
+    this.currentPlayingId = trackId;
+  }
+
   getEmbedUrl(trackId: string): SafeResourceUrl {
     const url = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
@@ -124,6 +132,10 @@ export class HomeComponent implements OnInit {
 
     this.http.post("http://localhost:8080/music/remove", info).subscribe({
       next: () => {
+        // 🔊 NUEVO: si estaba sonando, parar reproducción
+        if (this.currentPlayingId === trackId) {
+          this.currentPlayingId = null;
+        }
         this.refreshPlaylistData();
       },
       error: (err) => alert("Error al borrar: " + err.message)
@@ -150,7 +162,6 @@ export class HomeComponent implements OnInit {
       password: this.editData.password
     };
 
-    // 👇 CAMBIO AQUÍ: La URL correcta es /users/update
     this.http.post("http://localhost:8080/users/update", info).subscribe({
       next: (updatedUser: any) => {
         alert("¡Datos actualizados!");

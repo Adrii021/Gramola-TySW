@@ -1,200 +1,274 @@
-.main-container {
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 0 20px;
+/* ===============================
+   Layout general
+   =============================== */
+
+.home {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(29,185,84,0.15), transparent 45%),
+    #020617;
+  padding: 40px 20px;
 }
 
-/* HEADER */
-.app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+.home-container {
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-.brand-title {
-    font-size: 2rem;
-    font-weight: 800;
-    /* Gradiente bonito para el logo */
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin: 0;
-    letter-spacing: -1px;
+/* ===============================
+   Header
+   =============================== */
+
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
 }
 
-/* TARJETAS (Efecto Card) */
-.dashboard-card {
-    background: white;
-    border-radius: 16px;
-    /* Sombra suave y profesional */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    padding: 40px;
-    border: 1px solid #f3f4f6;
+.brand {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #e5e7eb;
 }
 
-.welcome-title {
-    font-size: 1.8rem;
-    color: #111827;
-    margin-bottom: 5px;
-    font-weight: 700;
+.brand span {
+  color: #1db954;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid #1f2937;
+  color: #9ca3af;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+/* ===============================
+   Card principal
+   =============================== */
+
+.card {
+  background: rgba(2, 6, 23, 0.9);
+  border-radius: 22px;
+  padding: 40px;
+  box-shadow: 0 30px 60px rgba(0,0,0,.55);
+  backdrop-filter: blur(12px);
+}
+
+/* ===============================
+   Títulos
+   =============================== */
+
+.welcome {
+  font-size: 1.6rem;
+  color: #e5e7eb;
+  margin-bottom: 6px;
 }
 
 .subtitle {
-    color: #6b7280;
-    margin-bottom: 30px;
-    font-size: 1rem;
+  color: #9ca3af;
+  margin-bottom: 30px;
 }
 
-/* INPUTS MODERNOS */
-.search-container {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 30px;
+/* ===============================
+   Buscador
+   =============================== */
+
+.search {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 30px;
 }
 
-.input-modern {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #e5e7eb;
-    border-radius: 10px;
-    font-size: 1rem;
-    transition: all 0.2s;
-    outline: none;
-    color: #374151;
+.search input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #1f2937;
+  background: #020617;
+  color: #e5e7eb;
 }
 
-.input-modern:focus {
-    border-color: #6366f1;
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+.search input::placeholder {
+  color: #6b7280;
 }
 
-/* BOTONES */
-.btn {
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 0.95rem;
+.search input:focus {
+  outline: none;
+  border-color: #1db954;
+  box-shadow: 0 0 0 2px rgba(29,185,84,0.25);
 }
 
-.btn:active { transform: scale(0.98); }
+/* ===============================
+   Botones
+   =============================== */
 
 .btn-primary {
-    background: #4f46e5;
-    color: white;
-    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
-}
-.btn-primary:hover { background: #4338ca; box-shadow: 0 6px 8px rgba(79, 70, 229, 0.3); }
-
-.btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
-    border: 1px solid #e5e7eb;
-}
-.btn-secondary:hover { background: #e5e7eb; color: #111827; }
-
-.btn-success {
-    background: #10b981;
-    color: white;
-}
-.btn-success:hover { background: #059669; }
-
-.btn-danger {
-    background: #fff;
-    color: #ef4444;
-    border: 1px solid #fee2e2;
-}
-.btn-danger:hover { background: #fef2f2; border-color: #fecaca; }
-
-.btn-ghost {
-    background: transparent;
-    color: #9ca3af;
-    padding: 8px;
-}
-.btn-ghost:hover {
-    background: #fee2e2;
-    color: #ef4444;
+  background: #1db954;
+  color: #000;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-/* LISTAS DE CANCIONES */
-.track-list { margin-top: 20px; }
-
-.track-item {
-    background: white;
-    border: 1px solid #f3f4f6;
-    padding: 12px;
-    margin-bottom: 12px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    transition: all 0.2s;
+.btn-primary:hover {
+  box-shadow: 0 10px 25px rgba(29,185,84,.35);
 }
 
-.track-item:hover {
-    border-color: #6366f1;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+/* ===============================
+   Listas
+   =============================== */
+
+.section-title {
+  color: #e5e7eb;
+  margin-bottom: 15px;
+}
+
+/* ===============================
+   Track item
+   =============================== */
+
+.track {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: #020617;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+
+.track img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
 }
 
 .track-info {
-    flex-grow: 1;
-    margin-left: 15px;
+  flex: 1;
 }
 
-.track-title {
-    display: block;
-    font-weight: 600;
-    color: #1f2937;
+.track-name {
+  color: #e5e7eb;
+  font-weight: 600;
 }
+
 .track-artist {
-    color: #6b7280;
-    font-size: 0.85rem;
+  color: #9ca3af;
+  font-size: 0.85rem;
 }
 
-.album-art {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    object-fit: cover;
+.add-btn {
+  background: #1db954;
+  color: #000;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.view-switch {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0 25px;
 }
 
-/* SECCIÓN CONFIGURACIÓN */
-.settings-panel {
-    background: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    padding: 24px;
-    margin-top: 20px;
+.tab-btn {
+  background: transparent;
+  border: 1px solid #1f2937;
+  color: #9ca3af;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
 }
 
-.form-group { margin-bottom: 20px; }
-.form-label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem; color: #374151; }
-
-/* PANEL INFERIOR (GRID) */
-.control-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 1px solid #f3f4f6;
+.tab-btn.active {
+  background: #1db954;
+  color: #000;
+  border-color: #1db954;
+}
+.view-switch {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0 25px;
 }
 
-.control-card {
-    background: #f9fafb;
-    padding: 20px;
-    border-radius: 12px;
-    border: 1px solid #e5e7eb;
-    transition: all 0.2s;
+.tab-btn {
+  background: transparent;
+  border: 1px solid #1f2937;
+  color: #9ca3af;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.85rem;
 }
-.control-card:hover { border-color: #d1d5db; }
 
-.control-card h3 { margin-top: 0; font-size: 1.1rem; }
-.control-card p { color: #6b7280; font-size: 0.9rem; margin-bottom: 15px; }
+.tab-btn.active {
+  background: #1db954;
+  color: #000;
+  border-color: #1db954;
+}
+.play-btn {
+  background: transparent;
+  border: 1px solid #1db954;
+  color: #1db954;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.play-btn:hover {
+  background: #1db954;
+  color: #000;
+}
+
+.track.playing {
+  border-color: #1db954;
+  box-shadow: 0 0 0 1px rgba(29,185,84,0.4);
+  background: #020617;
+}
+
+
+.playing-pill {
+  background: rgba(29, 185, 84, 0.15);
+  color: #1db954;
+  border: 1px solid #1db954;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.playing-pill {
+  animation: pulse 1.5s infinite;
+}
+.play-btn.active {
+  background: #1db954;
+  color: #000;
+}
+.spotify-embed {
+  margin: 8px 0 24px 56px;
+  padding-left: 16px;
+  border-left: 2px solid #1db954;
+  opacity: 0.95;
+}

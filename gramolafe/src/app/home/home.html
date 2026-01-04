@@ -1,121 +1,156 @@
-<div class="main-container">
-    
-    <header class="app-header">
-        <h1 class="brand-title">🎵 Gramola</h1>
-        <button (click)="logout()" class="btn btn-danger">
-            Cerrar Sesión
-        </button>
+<div class="home">
+  <div class="home-container">
+
+    <!-- HEADER -->
+    <header class="home-header">
+      <div class="brand">
+        🎵 <span>Gramola</span>
+      </div>
+
+      <button class="logout-btn" (click)="logout()">
+        Cerrar sesión
+      </button>
     </header>
 
-    <div class="dashboard-card">
-        <h2 class="welcome-title">Hola, {{ barName }} 👋</h2>
-        <p class="subtitle">Gestiona la música de tu local</p>
-        
-        <div *ngIf="!showingSettings" class="search-container">
-            <input type="text" [(ngModel)]="query" placeholder="Buscar canción o artista..." 
-                   (keyup.enter)="search()"
-                   class="input-modern">
-            
-            <button (click)="search()" class="btn btn-primary">
-                🔍 Buscar
-            </button>
+    <!-- CARD -->
+    <div class="card">
+
+      <!-- BIENVENIDA -->
+      <h2 class="welcome">
+        Hola, {{ barName }} 👋
+      </h2>
+      <p class="subtitle">
+        Gestiona la música de tu local
+      </p>
+
+      <!-- BUSCADOR -->
+      <div class="search">
+        <input
+          type="text"
+          [(ngModel)]="query"
+          placeholder="Buscar canción o artista…"
+          (keyup.enter)="search()"
+        />
+        <button class="btn-primary" (click)="search()">
+          Buscar
+        </button>
+      </div>
+
+      <!-- SWITCH -->
+      <div class="view-switch">
+        <button
+          class="tab-btn"
+          [class.active]="!showingPlaylist"
+          (click)="showingPlaylist = false"
+        >
+          Resultados
+        </button>
+
+        <button
+          class="tab-btn"
+          [class.active]="showingPlaylist"
+          (click)="openPlaylist()"
+        >
+          Mi playlist ({{ playlist.length }})
+        </button>
+      </div>
+
+      <!-- RESULTADOS -->
+      <div *ngIf="tracks.length > 0 && !showingPlaylist">
+        <h3 class="section-title">Resultados</h3>
+
+        <div *ngFor="let track of tracks" class="track">
+          <img
+            *ngIf="track.album?.images[0]"
+            [src]="track.album.images[0].url"
+            alt="cover"
+          />
+
+          <div class="track-info">
+            <div class="track-name">{{ track.name }}</div>
+            <div class="track-artist">
+              {{ track.artists[0].name }}
+            </div>
+          </div>
+
+          <button class="add-btn" (click)="add(track)">
+            Añadir
+          </button>
+        </div>
+      </div>
+
+      <!-- PLAYLIST -->
+      <div *ngIf="showingPlaylist">
+
+        <div class="playlist-header">
+          <h3>🎧 Tu playlist</h3>
+          <span>{{ playlist.length }} canciones</span>
         </div>
 
-        <div *ngIf="tracks.length > 0 && !showingPlaylist && !showingSettings" class="track-list">
-            <h3 style="color: #4f46e5; margin-bottom: 15px;">Resultados:</h3>
-            
-            <div *ngFor="let track of tracks" class="track-item">
-                <img *ngIf="track.album?.images[0]" [src]="track.album.images[0].url" class="album-art">
-                
-                <div class="track-info">
-                    <span class="track-title">{{ track.name }}</span>
-                    <span class="track-artist">{{ track.artists[0].name }}</span>
-                </div>
-                
-                <button (click)="add(track)" class="btn btn-success" style="padding: 6px 12px; font-size: 0.9rem;">
-                    ➕ Añadir
-                </button>
+        <p
+          *ngIf="playlist.length === 0"
+          class="subtitle center"
+        >
+          Aún no has añadido canciones 🎶
+        </p>
+
+        <div *ngFor="let item of playlist; let i = index">
+
+          <!-- TRACK -->
+          <div
+            class="track"
+            [class.playing]="currentPlayingId === item.spotifyId"
+          >
+            <img
+              *ngIf="item.imageUrl"
+              [src]="item.imageUrl"
+              alt="cover"
+            />
+
+            <div class="track-info">
+              <div class="track-name">
+                {{ i + 1 }}. {{ item.name }}
+              </div>
+              <div class="track-artist">
+                {{ item.artist }}
+              </div>
             </div>
+
+            <div class="track-actions">
+              <button
+                class="play-btn"
+                [class.active]="currentPlayingId === item.spotifyId"
+                (click)="play(item.spotifyId)"
+              >
+                ▶ Reproducir
+              </button>
+
+              <button
+                class="add-btn"
+                (click)="remove(item.spotifyId)"
+              >
+                Quitar
+              </button>
+            </div>
+          </div>
+
+          <!-- SPOTIFY EMBED (ÚNICO INDICADOR DE REPRODUCCIÓN) -->
+          <div
+            *ngIf="currentPlayingId === item.spotifyId"
+            class="spotify-embed"
+          >
+            <iframe
+              [src]="getEmbedUrl(item.spotifyId)"
+              width="100%"
+              height="80"
+              frameborder="0"
+              allow="encrypted-media"
+            ></iframe>
+          </div>
+
         </div>
+      </div>
 
-        <div *ngIf="showingPlaylist && !showingSettings" class="track-list">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h3 style="color: #4f46e5; margin: 0;">📜 Tu Lista de Reproducción</h3>
-                <span class="subtitle" style="margin: 0;">{{ playlist.length }} canciones</span>
-            </div>
-            
-            <p *ngIf="playlist.length === 0" style="color: #9ca3af; text-align: center; padding: 20px;">
-                La lista está vacía. ¡Añade música para empezar la fiesta! 🎉
-            </p>
-
-            <div *ngFor="let item of playlist; let i = index" class="track-item" style="flex-direction: column; align-items: stretch;">
-                
-                <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                    <span style="font-weight: 700; color: #d1d5db; margin-right: 15px; font-size: 1.2rem;">#{{ i + 1 }}</span>
-
-                    <img *ngIf="item.imageUrl" [src]="item.imageUrl" class="album-art" style="margin-right: 15px;">
-                    
-                    <div class="track-info">
-                        <span class="track-title">{{ item.name }}</span>
-                        <span class="track-artist">{{ item.artist }}</span>
-                    </div>
-
-                    <button (click)="remove(item.spotifyId)" class="btn btn-ghost" title="Borrar canción">
-                        🗑️
-                    </button>
-                </div>
-
-                <iframe [src]="getEmbedUrl(item.spotifyId)" 
-                        width="100%" 
-                        height="80" 
-                        frameBorder="0" 
-                        allow="encrypted-media" 
-                        style="border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                </iframe>
-            </div>
-        </div>
-
-        <div *ngIf="showingSettings" class="settings-modal">
-            <h3 style="color: #111827; margin-top: 0; margin-bottom: 20px;">⚙️ Editar Perfil</h3>
-            
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">Nombre del Bar</label>
-                <input type="text" [(ngModel)]="editData.name" class="input-modern">
-            </div>
-
-            <div style="margin-bottom: 25px;">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600; font-size: 0.9rem;">Nueva Contraseña</label>
-                <input type="password" [(ngModel)]="editData.password" placeholder="Deja en blanco para no cambiar" class="input-modern">
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button (click)="cancelSettings()" class="btn" style="background: #e5e7eb; color: #374151;">
-                    Cancelar
-                </button>
-                <button (click)="saveSettings()" class="btn btn-primary">
-                    💾 Guardar Cambios
-                </button>
-            </div>
-        </div>
-
-        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-
-        <div class="control-panel">
-            <div class="control-card">
-                <h3 style="margin-top: 0;">📜 Playlist</h3>
-                <p style="color: #6b7280; font-size: 0.9rem;">Gestiona qué suena ahora mismo.</p>
-                <button (click)="openPlaylist()" class="btn btn-secondary" style="width: 100%; justify-content: center;">
-                    Ver Lista
-                </button>
-            </div>
-            
-            <div class="control-card">
-                <h3 style="margin-top: 0;">⚙️ Ajustes</h3>
-                <p style="color: #6b7280; font-size: 0.9rem;">Personaliza tu perfil.</p>
-                <button (click)="openSettings()" class="btn btn-secondary" style="width: 100%; justify-content: center;">
-                    Editar Perfil
-                </button>
-            </div>
-        </div>
     </div>
+  </div>
 </div>

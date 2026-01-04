@@ -1,10 +1,12 @@
 package edu.uclm.es.gramola.model;
 
+import java.util.UUID;
+
+import org.json.JSONObject;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
-import java.util.UUID;
-import org.json.JSONObject;
 
 @Entity
 public class StripeTransaction {
@@ -28,4 +30,18 @@ public class StripeTransaction {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    // 👇 ESTE ES EL MÉTODO QUE SOLUCIONA EL ERROR
+    // Extrae el client_secret del JSON 'data' para enviarlo al Frontend
+    public String getClientSecret() {
+        if (this.data != null) {
+            try {
+                JSONObject json = new JSONObject(this.data);
+                return json.optString("client_secret");
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
 }
