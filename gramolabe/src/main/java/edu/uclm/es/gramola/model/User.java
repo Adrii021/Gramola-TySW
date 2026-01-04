@@ -18,16 +18,21 @@ public class User {
     private String email;
     private String pwd;
     
-    // Campos añadidos para la práctica Gramola
     private String bar;
     private String clientId;
     private String clientSecret;
 
-    // AQUÍ EL CAMBIO: Añadimos @JsonIgnore para que no falle al enviar al frontend 👇
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, optional = false)
+    // 👇 CAMBIO: FetchType.EAGER para cargar el token siempre
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true, optional = false)
     @JoinColumn(name = "creation_token_id", referencedColumnName = "id")
-    @JsonIgnore
+    // @JsonIgnore  <--- ⚠️ COMENTADO: Así el frontend recibe el token y sabe si has pagado
     private Token creationToken;
+
+    // Token para recuperar contraseña
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "reset_token_id", referencedColumnName = "id")
+    @JsonIgnore
+    private Token resetToken;
 
     public void setPwd(String pwd) {
         this.pwd = this.encryptPassword(pwd);
@@ -75,6 +80,14 @@ public class User {
 
     public Token getCreationToken() {
         return creationToken;
+    }
+
+    public void setResetToken(Token resetToken) {
+        this.resetToken = resetToken;
+    }
+
+    public Token getResetToken() {
+        return resetToken;
     }
 
     public void setPassword(String password) {

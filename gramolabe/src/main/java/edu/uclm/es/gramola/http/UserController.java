@@ -28,7 +28,6 @@ public class UserController {
     @Autowired
     private UserService service;
 
-    @CrossOrigin(origins = "http://localhost:4200")
     @PostMapping("/register")
     public void register(@RequestBody Map<String, String> body) {
         String email = body.get("email");
@@ -38,15 +37,8 @@ public class UserController {
         String clientId = body.get("clientId");
         String clientSecret = body.get("clientSecret");
 
-        if(!pwd1.equals(pwd2)) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Passwords do not match");
-        }
-        if(pwd1.length() < 8) {
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Password must be at least 8 characters");
-        }
-        if(!email.contains("@") || !email.contains(".")) {
-            throw new RuntimeException("Invalid email address");
-        }
+        if(!pwd1.equals(pwd2)) throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Passwords do not match");
+        if(pwd1.length() < 4) throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Password too short");
         
         this.service.register(email, pwd1, bar, clientId, clientSecret);
     }
@@ -69,19 +61,35 @@ public class UserController {
         return this.service.login(email, pwd);
     }
 
-    // 👇 ESTE ES EL MÉTODO QUE FALTABA
     @PostMapping("/update")
     public User update(@RequestBody Map<String, String> info) {
         String email = info.get("userId");
         String name = info.get("name");
         String pwd = info.get("password");
         
-        // Llamamos al servicio para actualizar
         User updatedUser = this.service.updateUser(email, name, pwd);
         
-        if (updatedUser == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
-        }
+        if (updatedUser == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
         return updatedUser;
+    }
+
+    // 👇 NUEVO: Pedir recuperación
+    @PostMapping("/request-reset")
+    public void requestReset(@RequestBody Map<String, String> info) {
+        String email = info.get("email");
+        this.service.requestPasswordReset(email);
+    }
+
+    // 👇 NUEVO: Ejecutar cambio de contraseña
+    @PostMapping("/reset-pwd")
+    public void resetPwd(@RequestBody Map<String, String> info) {
+        String email = info.get("email");
+        String token = info.get("token");
+        String pwd1 = info.get("pwd1");
+        String pwd2 = info.get("pwd2");
+
+        if (!pwd1.equals(pwd2)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Las contraseñas no coinciden");
+        
+        this.service.resetPassword(email, token, pwd1);
     }
 }

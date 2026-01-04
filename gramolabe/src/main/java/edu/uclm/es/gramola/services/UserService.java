@@ -36,11 +36,8 @@ public class UserService {
             user.setCreationToken(token);
             this.userDao.save(user);
             
-            System.out.println("----------------------------------------------------------------");
-            System.out.println("CORREO SIMULADO PARA: " + email);
-            System.out.println("Para confirmar tu cuenta haz clic aquí:");
-            System.out.println("http://localhost:8080/users/confirm/Token/" + email + "?token=" + token.getId());
-            System.out.println("----------------------------------------------------------------");
+            System.out.println("--- EMAIL REGISTRO ---");
+            System.out.println("Confirmar: http://localhost:8080/users/confirm/Token/" + email + "?token=" + token.getId());
         }
         else {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El usuario ya existe");
@@ -64,9 +61,6 @@ public class UserService {
         if(!userToken.getId().equals(token)) {
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, "Token incorrecto");
         }
-        if(userToken.getCreationTime() < System.currentTimeMillis() - (60*1000*30)) {
-            throw new ResponseStatusException(HttpStatus.GONE, "Token caducado");
-        }
         if(userToken.isUsed()) {
             throw new ResponseStatusException(HttpStatus.GONE, "Token ya usado");
         }
@@ -87,28 +81,58 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Credenciales incorrectas");
         }
         
+        // 👇 CAMBIO: Comentamos esto para permitir login sin pago (Modelo Freemium)
+        /*
         if (!user.getCreationToken().isUsed()) {
             throw new ResponseStatusException(HttpStatus.PAYMENT_REQUIRED, "Debes completar el pago antes de entrar");
         }
+        */
         
         return user;
     }
 
-    // 👇 AQUÍ ESTABA EL ERROR: Usamos setBar en vez de setName
     public User updateUser(String email, String newName, String newPassword) {
         User user = this.userDao.findById(email).orElse(null);
         if (user == null) return null;
 
-        // Actualizamos el nombre del bar
         if (newName != null && !newName.isEmpty()) {
-            user.setBar(newName); // <--- CAMBIO: setBar
+            user.setBar(newName);
         }
 
-        // Actualizamos la contraseña
         if (newPassword != null && !newPassword.isEmpty()) {
             user.setPwd(newPassword);
         }
 
         return this.userDao.save(user);
+    }
+
+    public void requestPasswordReset(String email) {
+        Optional<User> optUser = this.userDao.findById(email);
+        if (optUser.isPresent()) {
+            User user = optUser.get();
+            Token token = new Token();
+            user.setResetToken(token);
+            this.userDao.save(user);
+
+            System.out.println("----------------------------------------------------------------");
+            System.out.println("📧 RECUPERACIÓN DE CONTRASEÑA PARA: " + email);
+            System.out.println("Haz clic aquí para cambiarla:");
+            System.out.println("http://localhost:4200/reset-password?email=" + email + "&token=" + token.getId());
+            System.out.println("----------------------------------------------------------------");
+        }
+    }
+
+    public void resetPassword(String email, String token, String newPassword) {
+        User user = this.userDao.findById(email)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        
+        Token resetToken = user.getResetToken();
+        if (resetToken == null || !resetToken.getId().equals(token)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Token inválido");
+        }
+        
+        user.setPwd(newPassword);
+        user.setResetToken(null); 
+        this.userDao.save(user);
     }
 }

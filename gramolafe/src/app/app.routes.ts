@@ -1,17 +1,21 @@
 import { Routes } from '@angular/router';
-import { Register } from './register/register';
-import { PaymentComponent } from './payment/payment.component';
+import { WelcomeComponent } from './welcome/welcome';
 import { LoginComponent } from './login/login.component';
-import { HomeComponent } from './home/home'; 
-import { WelcomeComponent } from './welcome/welcome'; // <--- 1. Importar
+import { Register} from './register/register';
+import { HomeComponent } from './home/home';
+import { PaymentComponent } from './payment/payment.component';
+// Importamos los nuevos componentes
+import { RequestResetComponent } from './password/request';
+import { ResetPwdComponent } from './password/reset';
 
 export const routes: Routes = [
-    { path: 'welcome', component: WelcomeComponent }, // <--- 2. Nueva ruta
-    { path: 'register', component: Register },
-    { path: 'payment', component: PaymentComponent },
-    { path: 'login', component: LoginComponent },
-    { path: 'home', component: HomeComponent },
-    
-    // 👇 3. CAMBIO IMPORTANTE: Redirigir a 'welcome' en vez de 'register'
-    { path: '', redirectTo: '/welcome', pathMatch: 'full' } 
+  { path: '', component: WelcomeComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: Register },
+  { path: 'home', component: HomeComponent },
+  { path: 'payment', component: PaymentComponent },
+  
+  // 👇 NUEVAS RUTAS
+  { path: 'forgot-password', component: RequestResetComponent },
+  { path: 'reset-password', component: ResetPwdComponent }
 ];

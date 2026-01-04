@@ -1,6 +1,6 @@
 <div class="auth">
   <div class="auth-card">
-    <h2>Bienvenido de nuevo</h2>
+    <h2>Bienvenido de nuevo </h2>
 
     <p class="subtitle">
       Gestiona la música de tu bar
@@ -13,6 +13,7 @@
         [(ngModel)]="email"
         name="email"
         placeholder="tu@email.com"
+        class="input-modern"
       />
     </div>
 
@@ -23,7 +24,12 @@
         [(ngModel)]="pwd"
         name="pwd"
         placeholder="Tu contraseña"
+        class="input-modern"
       />
+    </div>
+
+    <div class="forgot-pass">
+        <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
     </div>
 
     <button class="btn-primary" (click)="login()">

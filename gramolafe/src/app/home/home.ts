@@ -20,7 +20,6 @@ export class HomeComponent implements OnInit {
   playlist: any[] = [];
   showingPlaylist: boolean = false;
 
-  // 🔊 NUEVO: canción que se está reproduciendo
   currentPlayingId: string | null = null;
 
   showingSettings: boolean = false; 
@@ -75,6 +74,19 @@ export class HomeComponent implements OnInit {
     if (!userJson) return;
     const user = JSON.parse(userJson);
 
+    // 👇 LÓGICA DE PAGO (CANDADO) 👇
+    // Comprobamos si el token existe y si NO está usado
+    if (user.creationToken && !user.creationToken.used) {
+      alert("⚠️ Funcionalidad Premium\n\nDebes pagar para poder añadir canciones.");
+      
+      // Redirigimos a la pantalla de pago con su token
+      if (user.creationToken.id) {
+          window.location.href = '/payment?token=' + user.creationToken.id;
+      }
+      return; // Cortamos la ejecución aquí
+    }
+    // 👆 FIN LÓGICA DE PAGO 👆
+
     let info = {
       track: track,
       userId: user.email
@@ -108,7 +120,6 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  // 🔊 NUEVO: reproducir canción
   play(trackId: string) {
     this.currentPlayingId = trackId;
   }
@@ -132,7 +143,6 @@ export class HomeComponent implements OnInit {
 
     this.http.post("http://localhost:8080/music/remove", info).subscribe({
       next: () => {
-        // 🔊 NUEVO: si estaba sonando, parar reproducción
         if (this.currentPlayingId === trackId) {
           this.currentPlayingId = null;
         }
