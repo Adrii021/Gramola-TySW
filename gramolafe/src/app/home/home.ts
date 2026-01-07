@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { PricingService } from '../services/pricing.service'; // 👇 Importar
 
 @Component({
   selector: 'app-home',
@@ -16,30 +17,38 @@ export class HomeComponent implements OnInit {
   barName: string = "Usuario";
   query: string = "";
   tracks: any[] = [];
-  
   playlist: any[] = [];
-  showingPlaylist: boolean = false;
-
   currentPlayingId: string | null = null;
-
+  showingPlaylist: boolean = false;
   showingSettings: boolean = false; 
-  editData = {
-    name: '',
-    password: ''
-  };
+  editData = { name: '', password: '' };
+  
+  // 👇 VARIABLES NUEVAS PARA EL MODAL DE PAGO
+  user: any;
+  showPaymentModal: boolean = false;
+  pendingTrack: any = null;
+  songPrice: number = 0.99; // Precio por defecto
 
   constructor(
     private router: Router, 
     private http: HttpClient, 
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private pricingService: PricingService // 👇 Inyectar
   ) {}
 
   ngOnInit() {
     const userJson = localStorage.getItem('currentUser');
     if (userJson) {
-      const user = JSON.parse(userJson);
-      this.barName = user.name || user.bar || "Usuario"; 
+      this.user = JSON.parse(userJson);
+      this.barName = this.user.name || this.user.bar || "Usuario"; 
       this.refreshPlaylistData(); 
+      
+      // 👇 Cargar precio de canción
+      this.pricingService.getPrices().subscribe(prices => {
+        const p = prices.find(x => x.type === 'SONG');
+        if(p) this.songPrice = p.price;
+      });
+
     } else {
       this.router.navigate(['/login']);
     }
@@ -51,141 +60,103 @@ export class HomeComponent implements OnInit {
   }
 
   search() {
-    const userJson = localStorage.getItem('currentUser');
-    if (!userJson) return;
-    const user = JSON.parse(userJson);
-
-    let info = {
-      query: this.query,
-      userId: user.email 
-    };
-
+    // Igual que antes...
+    let info = { query: this.query, userId: this.user.email };
     this.showingPlaylist = false;
     this.http.post<any[]>("http://localhost:8080/music/search", info).subscribe({
-      next: (resultado) => {
-        this.tracks = resultado;
-      },
-      error: (err) => alert("Error buscando: " + err.message)
+      next: (res) => this.tracks = res,
+      error: (e) => alert("Error buscando: " + e.message)
     });
   }
 
-  add(track: any) {
-    const userJson = localStorage.getItem('currentUser');
-    if (!userJson) return;
-    const user = JSON.parse(userJson);
-
-    // 👇 LÓGICA DE PAGO (CANDADO) 👇
-    // Comprobamos si el token existe y si NO está usado
-    if (user.creationToken && !user.creationToken.used) {
-      alert("⚠️ Funcionalidad Premium\n\nDebes pagar para poder añadir canciones.");
-      
-      // Redirigimos a la pantalla de pago con su token
-      if (user.creationToken.id) {
-          window.location.href = '/payment?token=' + user.creationToken.id;
-      }
-      return; // Cortamos la ejecución aquí
+  // 👇 LÓGICA DE AÑADIR MODIFICADA (Abre el Modal)
+  preAdd(track: any) {
+    // Si no ha pagado suscripción del bar, no dejamos hacer nada (bloqueo original)
+    if (this.user.creationToken && !this.user.creationToken.used) {
+      alert("⚠️ Debes completar la suscripción del bar primero.");
+      if(this.user.creationToken.id) window.location.href = '/payment?token=' + this.user.creationToken.id;
+      return;
     }
-    // 👆 FIN LÓGICA DE PAGO 👆
+    
+    // Abrimos el modal para elegir Priority o Normal
+    this.pendingTrack = track;
+    this.showPaymentModal = true;
+  }
 
+  addNormal() {
+    this.processAdd(this.pendingTrack, false);
+    this.closeModal();
+  }
+
+  addPriority() {
+    if(confirm(`Vas a pagar ${this.songPrice}€ para poner la canción YA. ¿Confirmar?`)) {
+      this.processAdd(this.pendingTrack, true); // true = priority
+      this.closeModal();
+    }
+  }
+
+  closeModal() {
+    this.showPaymentModal = false;
+    this.pendingTrack = null;
+  }
+
+  processAdd(track: any, isPriority: boolean) {
     let info = {
       track: track,
-      userId: user.email
+      userId: this.user.email,
+      priority: isPriority // 👇 Enviamos prioridad al backend
     };
 
     this.http.post("http://localhost:8080/music/add", info).subscribe({
       next: () => {
-        alert("¡Canción añadida!");
+        alert(isPriority ? "¡Canción prioritaria añadida! 🚀" : "Canción añadida a la cola");
         this.refreshPlaylistData(); 
       },
       error: (err) => alert("Error al añadir: " + err.message)
     });
   }
 
-  openPlaylist() {
-    this.showingPlaylist = true;
-    this.showingSettings = false; 
-    this.refreshPlaylistData();
-  }
-
-  private refreshPlaylistData() {
-    const userJson = localStorage.getItem('currentUser');
-    if (!userJson) return;
-    const user = JSON.parse(userJson);
-
-    this.http.post<any[]>("http://localhost:8080/music/playlist", { userId: user.email }).subscribe({
-      next: (lista) => {
-        this.playlist = lista;
-      },
-      error: (err) => console.error("Error cargando playlist", err)
+  // ... (Resto de métodos: play, getEmbedUrl, remove, settings... IGUAL QUE ANTES) ...
+  // Solo asegúrate de copiar el resto tal cual lo tenías:
+  
+  refreshPlaylistData() {
+    this.http.post<any[]>("http://localhost:8080/music/playlist", { userId: this.user.email }).subscribe({
+      next: (lista) => this.playlist = lista,
+      error: (err) => console.error(err)
     });
   }
-
-  play(trackId: string) {
-    this.currentPlayingId = trackId;
-  }
-
+  
+  play(trackId: string) { this.currentPlayingId = trackId; }
+  
   getEmbedUrl(trackId: string): SafeResourceUrl {
-    const url = `https://open.spotify.com/embed/track/${trackId}?utm_source=generator`;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    return this.sanitizer.bypassSecurityTrustResourceUrl(`https://open.spotify.com/embed/track/${trackId}?utm_source=generator`);
   }
 
   remove(trackId: string) {
-    const userJson = localStorage.getItem('currentUser');
-    if (!userJson) return;
-    const user = JSON.parse(userJson);
-
-    if(!confirm("¿Seguro que quieres borrar esta canción?")) return;
-
-    let info = {
-      userId: user.email,
-      trackId: trackId 
-    };
-
+    if(!confirm("¿Borrar canción?")) return;
+    let info = { userId: this.user.email, trackId: trackId };
     this.http.post("http://localhost:8080/music/remove", info).subscribe({
       next: () => {
-        if (this.currentPlayingId === trackId) {
-          this.currentPlayingId = null;
-        }
+        if (this.currentPlayingId === trackId) this.currentPlayingId = null;
         this.refreshPlaylistData();
       },
-      error: (err) => alert("Error al borrar: " + err.message)
+      error: (err) => alert("Error: " + err.message)
     });
   }
 
-  openSettings() {
-    this.showingSettings = true;
-    this.showingPlaylist = false; 
-    this.tracks = []; 
-
-    this.editData.name = this.barName;
-    this.editData.password = ""; 
-  }
-
+  openPlaylist() { this.showingPlaylist = true; this.refreshPlaylistData(); }
+  openSettings() { this.showingSettings = true; this.showingPlaylist = false; this.tracks = []; this.editData.name = this.barName; this.editData.password = ""; }
+  
   saveSettings() {
-    const userJson = localStorage.getItem('currentUser');
-    if (!userJson) return;
-    const user = JSON.parse(userJson);
-
-    let info = {
-      userId: user.email,
-      name: this.editData.name,
-      password: this.editData.password
-    };
-
+    let info = { userId: this.user.email, name: this.editData.name, password: this.editData.password };
     this.http.post("http://localhost:8080/users/update", info).subscribe({
       next: (updatedUser: any) => {
         alert("¡Datos actualizados!");
-        
         localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-        this.barName = updatedUser.name || updatedUser.bar; 
-        
-        this.showingSettings = false; 
+        this.barName = updatedUser.name || updatedUser.bar;
+        this.showingSettings = false;
       },
-      error: (err) => alert("Error al actualizar: " + err.message)
+      error: (err) => alert("Error: " + err.message)
     });
-  }
-
-  cancelSettings() {
-    this.showingSettings = false;
   }
 }

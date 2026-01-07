@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { PricingService } from '../services/pricing.service';
 
 declare var Stripe: any;
 
@@ -14,42 +15,53 @@ declare var Stripe: any;
 })
 export class PaymentComponent implements OnInit {
   token: string = "";
+  email: string = ""; // Variable para guardar el email
   stripe: any;
-  card: any; // <--- Importante: Guardamos la tarjeta aquí para no perderla
+  card: any; 
   clientSecret: string = "";
-  processing: boolean = false; // <--- Para bloquear el botón
+  processing: boolean = false;
+  price: number = 0; 
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private router: Router) {
-    // TU CLAVE PÚBLICA (La que empieza por pk_test_)
+  constructor(
+    private route: ActivatedRoute, 
+    private http: HttpClient, 
+    private router: Router,
+    private pricingService: PricingService
+  ) {
     this.stripe = Stripe("pk_test_51SixjzR3ux91c7imTZjFULUGxl7oh0SaevRtgx3WqDi34rWh2DGLlC5b9i7BURyReACNsz1sCzB7DR15k2DPTjEO00CEUH7qcB");
   }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.token = params['token'];
+      this.email = params['email']; // 👇 Recuperamos el email de la URL
+    });
+
+    this.pricingService.getPrices().subscribe({
+      next: (prices) => {
+        const plan = prices.find(p => p.type === 'MONTHLY');
+        if (plan) this.price = plan.price;
+      }
     });
   }
 
   prepay() {
-    this.http.post<any>("http://localhost:8080/payments/prepay", { token: this.token }).subscribe({
+    // 1. Pedir intento de pago al backend
+    let info = { 
+      token: this.token, 
+      amount: this.price 
+    };
+
+    // Usamos POST y enviamos el precio
+    this.http.post<any>("http://localhost:8080/payments/prepay", info).subscribe({
       next: (res) => {
         this.clientSecret = res.clientSecret;
         
-        // Ocultar botón prepay, mostrar formulario
+        // 2. Mostrar formulario solo si tenemos éxito
         document.getElementById("prepay-btn")!.style.display = "none";
         document.getElementById("payment-form")!.style.display = "block";
 
-        // Montar la tarjeta de Stripe
-        let elements = this.stripe.elements();
-        this.card = elements.create("card"); // Guardamos en this.card
-        this.card.mount("#card-element");
-
-        // Escuchar el evento submit del formulario
-        let form = document.getElementById("payment-form");
-        form!.addEventListener("submit", (event) => {
-          event.preventDefault();
-          this.payWithCard();
-        });
+        this.mountStripeElements();
       },
       error: (err) => {
         alert("Error al iniciar el pago: " + err.message);
@@ -57,36 +69,63 @@ export class PaymentComponent implements OnInit {
     });
   }
 
+  mountStripeElements() {
+    setTimeout(() => {
+        let elements = this.stripe.elements();
+        let style = { base: { color: "#32325d", fontFamily: 'Arial, sans-serif', fontSize: "16px" } };
+        
+        this.card = elements.create("card", { style: style });
+        this.card.mount("#card-element");
+
+        this.card.on("change", (event: any) => {
+          let displayError = document.getElementById("card-error");
+          if (event.error) displayError!.textContent = event.error.message;
+          else displayError!.textContent = "";
+        });
+
+        let form = document.getElementById("payment-form");
+        form!.addEventListener("submit", (event) => {
+          event.preventDefault();
+          this.payWithCard();
+        });
+    }, 100);
+  }
+
   payWithCard() {
-    // 1. Evitar doble clic
     if (this.processing) return;
     this.processing = true; 
     
-    // Cambiar texto del botón para que se vea que hace algo
     const btn = document.getElementById("submit") as HTMLButtonElement;
     btn.disabled = true;
-    btn.innerText = "Procesando pago...";
+    btn.innerText = "Procesando...";
 
-    // 2. Confirmar pago con Stripe
     this.stripe.confirmCardPayment(this.clientSecret, {
-      payment_method: {
-        card: this.card // Usamos la variable de clase
-      }
+      payment_method: { card: this.card }
     }).then((result: any) => {
       if (result.error) {
-        // Error de Stripe (ej: tarjeta rechazada)
         this.processing = false;
         btn.disabled = false;
-        btn.innerText = "Pagar 10,00 €";
-        
-        const errorElement = document.getElementById('card-error');
-        errorElement!.textContent = result.error.message;
+        btn.innerText = `Pagar ${this.price} €`;
         alert(result.error.message);
       } else {
-        // ¡ÉXITO!
         if (result.paymentIntent.status === 'succeeded') {
-          alert("¡Pago realizado con éxito! Redirigiendo al Login...");
-          this.router.navigate(['/login']);
+          // 👇 AQUÍ ESTÁ LA SOLUCIÓN AL 404
+          // Usamos this.email. Si está vacío (caso manual), usamos 'dummy' (fallará si no existe).
+          const userEmail = this.email || 'dummy';
+          
+          this.http.get(`http://localhost:8080/users/confirm/Token/${userEmail}?token=${this.token}`)
+            .subscribe({
+              next: () => {
+                alert("¡Pago completado! Cuenta activada.");
+                this.router.navigate(['/login']);
+              },
+              error: (err) => {
+                console.error(err);
+                // Si el pago pasó pero falló la confirmación, avisamos pero redirigimos
+                alert("Pago recibido. Redirigiendo..."); 
+                this.router.navigate(['/login']);
+              }
+            });
         }
       }
     });

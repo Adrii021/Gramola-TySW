@@ -48,10 +48,12 @@ public class UserController {
         this.service.delete(email);
     }
 
+    // 👇 CAMBIO CLAVE: Añadimos "&email=" + email a la URL de redirección
     @GetMapping("/confirm/Token/{email}")
     public void confirmToken(@PathVariable String email, @RequestParam String token, HttpServletResponse response) throws IOException {
         this.service.confirmToken(email, token);
-        response.sendRedirect("http://localhost:4200/payment?token=" + token);
+        // Al redirigir, pasamos el email para que Angular sepa quién está pagando
+        response.sendRedirect("http://localhost:4200/payment?token=" + token + "&email=" + email);
     }
 
     @PostMapping("/login")
@@ -68,19 +70,16 @@ public class UserController {
         String pwd = info.get("password");
         
         User updatedUser = this.service.updateUser(email, name, pwd);
-        
         if (updatedUser == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado");
         return updatedUser;
     }
 
-    // 👇 NUEVO: Pedir recuperación
     @PostMapping("/request-reset")
     public void requestReset(@RequestBody Map<String, String> info) {
         String email = info.get("email");
         this.service.requestPasswordReset(email);
     }
 
-    // 👇 NUEVO: Ejecutar cambio de contraseña
     @PostMapping("/reset-pwd")
     public void resetPwd(@RequestBody Map<String, String> info) {
         String email = info.get("email");
