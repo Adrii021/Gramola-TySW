@@ -1,6 +1,7 @@
 package edu.uclm.es.gramola.http;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,5 +91,12 @@ public class UserController {
         if (!pwd1.equals(pwd2)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Las contraseñas no coinciden");
         
         this.service.resetPassword(email, token, pwd1);
+    }
+    
+    @GetMapping("/bar-name/{id}")
+    public Map<String, String> getBarName(@PathVariable String id) {
+        String name = this.service.getBarName(id);
+        if (name == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bar no encontrado");
+        return Collections.singletonMap("name", name);
     }
 }

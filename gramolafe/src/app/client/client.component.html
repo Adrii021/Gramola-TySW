@@ -1,0 +1,71 @@
+<div class="home">
+  <div class="home-container">
+    <header class="home-header">
+      <div class="brand">
+        🎵 <span>Gramola</span> Client
+      </div>
+      <button class="logout-btn" (click)="exit()">Salir</button>
+    </header>
+
+    <div class="card">
+      <h2 class="welcome">Estás en: <span style="color:#1db954">{{ barName }}</span> 🍻</h2>
+      <p class="subtitle">Pide tu canción favorita</p>
+
+      <div class="search">
+        <input type="text" [(ngModel)]="query" placeholder="Busca tu temazo..." (keyup.enter)="search()" />
+        <button class="btn-primary" (click)="search()">Buscar</button>
+      </div>
+
+      <div *ngIf="tracks.length > 0">
+        <h3 class="section-title">Resultados</h3>
+        <div *ngFor="let item of tracks">
+          <div class="track">
+            <img *ngIf="item.album && item.album.images" [src]="item.album.images[0].url" alt="cover"/>
+            <div class="track-info">
+              <div class="track-name">{{ item.name }}</div>
+              <div class="track-artist" *ngIf="item.artists">{{ item.artists[0].name }}</div>
+            </div>
+            <button class="add-btn" (click)="preAdd(item)">Pedir</button>
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="tracks.length === 0 && query.length > 2" class="empty-state">
+        Sin resultados...
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showPaymentModal">
+  <div class="modal-content payment-modal">
+    <h3>🎵 Pedir canción</h3>
+    <p>¿Cómo quieres que suene <strong>{{ pendingTrack?.name }}</strong>?</p>
+    
+    <div class="options" *ngIf="!showStripeForm">
+      <div class="option-card" (click)="addNormal()">
+        <h4>🐢 Normal</h4>
+        <p>Gratis</p>
+        <small>A la cola</small>
+      </div>
+
+      <div class="option-card priority" (click)="initiatePriorityPayment()">
+        <h4>🚀 Prioritaria</h4>
+        <p class="price">{{ songPrice }} €</p>
+        <small>¡Suena YA!</small>
+      </div>
+    </div>
+
+    <div class="stripe-section" *ngIf="showStripeForm">
+      <div class="card-wrapper">
+        <div id="card-element-song"></div>
+      </div>
+      
+      <button class="btn-primary pay-btn" (click)="confirmPayment()" [disabled]="processing">
+        {{ processing ? 'Procesando...' : 'Pagar ' + songPrice + ' €' }}
+      </button>
+    </div>
+
+    <button class="close-btn" (click)="closeModal()">Cancelar</button>
+  </div>
+</div>

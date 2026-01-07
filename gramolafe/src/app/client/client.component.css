@@ -1,0 +1,125 @@
+/* Layout y Fondo */
+.home {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, rgba(29,185,84,0.15), transparent 45%), #020617;
+  padding: 40px 20px;
+  color: white; 
+  font-family: 'Arial', sans-serif;
+}
+.home-container { max-width: 800px; margin: 0 auto; }
+
+/* Header y Card */
+.home-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.brand { font-size: 1.8rem; font-weight: 800; color: #e5e7eb; }
+.brand span { color: #1db954; }
+.card { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 30px; border: 1px solid rgba(255,255,255,0.08); }
+.welcome { margin-top:0; font-size: 1.5rem; }
+.subtitle { color: #9ca3af; margin-bottom: 25px; }
+
+/* 👇 ESTILO DEL BOTÓN SALIR (AÑADIDO) */
+.logout-btn {
+  background: transparent;
+  border: 1px solid #1f2937;
+  color: #9ca3af;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+.logout-btn:hover {
+  color: #ef4444; /* Rojo al pasar el ratón */
+  border-color: #ef4444;
+}
+
+/* Buscador */
+.search { display: flex; gap: 10px; margin-bottom: 30px; }
+input { flex: 1; padding: 12px 15px; border-radius: 999px; border: 1px solid #374151; background: #111827; color: white; outline: none; }
+input:focus { border-color: #1db954; }
+.btn-primary { background: #1db954; color: black; border: none; padding: 12px 24px; border-radius: 999px; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+.btn-primary:hover { transform: scale(1.05); }
+
+/* Lista de Tracks */
+.track { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.track img { width: 50px; height: 50px; border-radius: 4px; margin-right: 15px; }
+.track-info { flex: 1; }
+.track-name { font-weight: bold; }
+.track-artist { font-size: 0.9rem; color: #9ca3af; }
+.add-btn { background: transparent; border: 1px solid #1db954; color: #1db954; padding: 6px 14px; border-radius: 999px; cursor: pointer; transition: 0.2s; font-size: 0.85rem;}
+.add-btn:hover { background: #1db954; color: black; }
+
+/* Empty state */
+.empty-state { text-align: center; color: #6b7280; margin-top: 30px; font-style: italic; }
+
+/* Modal */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
+.payment-modal { background: #1f2937; padding: 30px; border-radius: 16px; text-align: center; width: 90%; max-width: 450px; border: 1px solid #374151; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+.payment-modal h3 { margin-top: 0; color: white; }
+.options { display: flex; gap: 15px; margin: 25px 0; }
+.option-card { flex: 1; padding: 20px; border: 2px solid #374151; border-radius: 12px; cursor: pointer; background: #111827; transition: 0.2s; }
+.option-card:hover { border-color: #6b7280; transform: translateY(-3px); }
+.option-card.priority { border-color: #1db954; background: rgba(29, 185, 84, 0.1); }
+.option-card.priority:hover { background: rgba(29, 185, 84, 0.2); }
+.price { font-size: 1.4rem; font-weight: bold; color: #1db954; margin: 8px 0; }
+.close-btn { background: transparent; border: 1px solid #4b5563; color: #9ca3af; padding: 8px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+.close-btn:hover { background: #374151; color: white; }
+
+.home { min-height: 100vh; background: radial-gradient(circle at top, rgba(29,185,84,0.15), transparent 45%), #020617; padding: 40px 20px; color: white; font-family: 'Arial', sans-serif; }
+.home-container { max-width: 800px; margin: 0 auto; }
+.home-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.brand { font-size: 1.8rem; font-weight: 800; color: #e5e7eb; }
+.brand span { color: #1db954; }
+.logout-btn { background: transparent; border: 1px solid #1f2937; color: #9ca3af; padding: 8px 14px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+.logout-btn:hover { color: #ef4444; border-color: #ef4444; }
+.card { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 30px; border: 1px solid rgba(255,255,255,0.08); }
+.welcome { margin-top:0; font-size: 1.5rem; }
+.subtitle { color: #9ca3af; margin-bottom: 25px; }
+.search { display: flex; gap: 10px; margin-bottom: 30px; }
+input { flex: 1; padding: 12px 15px; border-radius: 999px; border: 1px solid #374151; background: #111827; color: white; outline: none; }
+.btn-primary { background: #1db954; color: black; border: none; padding: 12px 24px; border-radius: 999px; font-weight: bold; cursor: pointer; }
+.track { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+.track img { width: 50px; height: 50px; border-radius: 4px; margin-right: 15px; }
+.track-info { flex: 1; }
+.track-name { font-weight: bold; }
+.track-artist { font-size: 0.9rem; color: #9ca3af; }
+.add-btn { background: transparent; border: 1px solid #1db954; color: #1db954; padding: 6px 14px; border-radius: 999px; cursor: pointer; transition: 0.2s; font-size: 0.85rem;}
+.add-btn:hover { background: #1db954; color: black; }
+.empty-state { text-align: center; color: #6b7280; margin-top: 30px; font-style: italic; }
+
+/* MODAL Y OPCIONES */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
+.payment-modal { background: #1f2937; padding: 30px; border-radius: 16px; text-align: center; width: 90%; max-width: 450px; border: 1px solid #374151; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+.payment-modal h3 { margin-top: 0; color: white; }
+.options { display: flex; gap: 15px; margin: 25px 0; }
+.option-card { flex: 1; padding: 20px; border: 2px solid #374151; border-radius: 12px; cursor: pointer; background: #111827; transition: 0.2s; }
+.option-card:hover { border-color: #6b7280; transform: translateY(-3px); }
+.option-card.priority { border-color: #1db954; background: rgba(29, 185, 84, 0.1); }
+.option-card.priority:hover { background: rgba(29, 185, 84, 0.2); }
+.price { font-size: 1.4rem; font-weight: bold; color: #1db954; margin: 8px 0; }
+.close-btn { background: transparent; border: 1px solid #4b5563; color: #9ca3af; padding: 8px 20px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-top: 15px; }
+.close-btn:hover { background: #374151; color: white; }
+
+.stripe-section {
+  margin: 20px 0;
+  text-align: left;
+}
+
+.card-wrapper {
+  background: #111827;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  margin-bottom: 20px;
+}
+
+.pay-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+}
+
+.pay-btn:disabled {
+  background: #374151;
+  color: #9ca3af;
+  cursor: not-allowed;
+}

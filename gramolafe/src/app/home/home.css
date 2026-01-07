@@ -330,3 +330,8 @@
   transition: 0.2s;
 }
 .close-btn:hover { background: #374151; color: white; }
+.priority-text {
+    color: #1db954;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(29, 185, 84, 0.3);
+}

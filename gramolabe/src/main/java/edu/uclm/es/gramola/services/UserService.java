@@ -135,4 +135,9 @@ public class UserService {
         user.setResetToken(null); 
         this.userDao.save(user);
     }
+    public String getBarName(String email) {
+        return this.userDao.findById(email)
+            .map(User::getBar) // Obtiene el nombre si existe
+            .orElse(null);     // Devuelve null si no existe
+    }
 }

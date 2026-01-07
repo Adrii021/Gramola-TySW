@@ -13,31 +13,30 @@ public class SelectedTrack {
     private String name;
     private String artist;
     private String userId;
-    
-    // 👇 NUEVO: Para poder ordenar la cola
     private long createdAt;
+    
+    // 👇 CAMPO NUEVO: Para controlar el "Just-in-Time"
+    private boolean sentToSpotify = false;
 
     public SelectedTrack() {
         this.id = UUID.randomUUID().toString();
-        this.createdAt = System.currentTimeMillis(); // Por defecto, hora actual
+        this.createdAt = System.currentTimeMillis();
     }
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
-    
     public String getSpotifyId() { return spotifyId; }
     public void setSpotifyId(String spotifyId) { this.spotifyId = spotifyId; }
-    
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
-    
     public String getArtist() { return artist; }
     public void setArtist(String artist) { this.artist = artist; }
-    
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
-
-    // 👇 Getters y Setters nuevos
     public long getCreatedAt() { return createdAt; }
     public void setCreatedAt(long createdAt) { this.createdAt = createdAt; }
+    
+    // 👇 Getters y Setters del nuevo campo
+    public boolean isSentToSpotify() { return sentToSpotify; }
+    public void setSentToSpotify(boolean sentToSpotify) { this.sentToSpotify = sentToSpotify; }
 }

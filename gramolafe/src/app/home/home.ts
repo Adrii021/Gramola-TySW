@@ -3,8 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { PricingService } from '../services/pricing.service'; // 👇 Importar
+import { PricingService } from '../services/pricing.service';
 
 @Component({
   selector: 'app-home',
@@ -18,22 +17,22 @@ export class HomeComponent implements OnInit {
   query: string = "";
   tracks: any[] = [];
   playlist: any[] = [];
-  currentPlayingId: string | null = null;
+  
+  // Variables de estado
   showingPlaylist: boolean = false;
   showingSettings: boolean = false; 
   editData = { name: '', password: '' };
   
-  // 👇 VARIABLES NUEVAS PARA EL MODAL DE PAGO
+  // Variables Pago
   user: any;
   showPaymentModal: boolean = false;
   pendingTrack: any = null;
-  songPrice: number = 0.99; // Precio por defecto
+  songPrice: number = 0.99;
 
   constructor(
     private router: Router, 
     private http: HttpClient, 
-    private sanitizer: DomSanitizer,
-    private pricingService: PricingService // 👇 Inyectar
+    private pricingService: PricingService
   ) {}
 
   ngOnInit() {
@@ -43,7 +42,6 @@ export class HomeComponent implements OnInit {
       this.barName = this.user.name || this.user.bar || "Usuario"; 
       this.refreshPlaylistData(); 
       
-      // 👇 Cargar precio de canción
       this.pricingService.getPrices().subscribe(prices => {
         const p = prices.find(x => x.type === 'SONG');
         if(p) this.songPrice = p.price;
@@ -60,25 +58,22 @@ export class HomeComponent implements OnInit {
   }
 
   search() {
-    // Igual que antes...
+    if (!this.query.trim()) return;
     let info = { query: this.query, userId: this.user.email };
     this.showingPlaylist = false;
+    
     this.http.post<any[]>("http://localhost:8080/music/search", info).subscribe({
       next: (res) => this.tracks = res,
       error: (e) => alert("Error buscando: " + e.message)
     });
   }
 
-  // 👇 LÓGICA DE AÑADIR MODIFICADA (Abre el Modal)
   preAdd(track: any) {
-    // Si no ha pagado suscripción del bar, no dejamos hacer nada (bloqueo original)
     if (this.user.creationToken && !this.user.creationToken.used) {
       alert("⚠️ Debes completar la suscripción del bar primero.");
       if(this.user.creationToken.id) window.location.href = '/payment?token=' + this.user.creationToken.id;
       return;
     }
-    
-    // Abrimos el modal para elegir Priority o Normal
     this.pendingTrack = track;
     this.showPaymentModal = true;
   }
@@ -90,7 +85,7 @@ export class HomeComponent implements OnInit {
 
   addPriority() {
     if(confirm(`Vas a pagar ${this.songPrice}€ para poner la canción YA. ¿Confirmar?`)) {
-      this.processAdd(this.pendingTrack, true); // true = priority
+      this.processAdd(this.pendingTrack, true);
       this.closeModal();
     }
   }
@@ -104,42 +99,31 @@ export class HomeComponent implements OnInit {
     let info = {
       track: track,
       userId: this.user.email,
-      priority: isPriority // 👇 Enviamos prioridad al backend
+      priority: isPriority
     };
 
     this.http.post("http://localhost:8080/music/add", info).subscribe({
       next: () => {
-        alert(isPriority ? "¡Canción prioritaria añadida! 🚀" : "Canción añadida a la cola");
+        alert(isPriority ? "¡Canción prioritaria enviada a la cola! 🚀" : "Canción enviada a la cola");
         this.refreshPlaylistData(); 
       },
       error: (err) => alert("Error al añadir: " + err.message)
     });
   }
 
-  // ... (Resto de métodos: play, getEmbedUrl, remove, settings... IGUAL QUE ANTES) ...
-  // Solo asegúrate de copiar el resto tal cual lo tenías:
-  
   refreshPlaylistData() {
     this.http.post<any[]>("http://localhost:8080/music/playlist", { userId: this.user.email }).subscribe({
       next: (lista) => this.playlist = lista,
       error: (err) => console.error(err)
     });
   }
-  
-  play(trackId: string) { this.currentPlayingId = trackId; }
-  
-  getEmbedUrl(trackId: string): SafeResourceUrl {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(`https://open.spotify.com/embed/track/${trackId}?utm_source=generator`);
-  }
 
   remove(trackId: string) {
-    if(!confirm("¿Borrar canción?")) return;
+    if(!confirm("¿Borrar canción de la lista visual? (Seguirá sonando en Spotify si ya se cargó)")) return;
+    
     let info = { userId: this.user.email, trackId: trackId };
     this.http.post("http://localhost:8080/music/remove", info).subscribe({
-      next: () => {
-        if (this.currentPlayingId === trackId) this.currentPlayingId = null;
-        this.refreshPlaylistData();
-      },
+      next: () => this.refreshPlaylistData(),
       error: (err) => alert("Error: " + err.message)
     });
   }

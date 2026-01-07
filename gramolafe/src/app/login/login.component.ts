@@ -14,23 +14,26 @@ import { User } from '../user';
 export class LoginComponent {
   email = '';
   pwd = '';
+  
+  // 👇 Variable nueva para el cliente
+  barIdInput = '';
 
   constructor(private userService: User, private router: Router) {}
-
-
 
   login() {
     this.userService.login(this.email, this.pwd).subscribe({
       next: (user) => {
-        // 1. Guardamos el usuario en la memoria del navegador para no perderlo
         localStorage.setItem('currentUser', JSON.stringify(user));
-        
-        // 2. Redirigimos a la pantalla principal
         this.router.navigate(['/home']);
       },
-      error: (err) => {
-        alert("Error: " + (err.error?.message || "Login fallido"));
-      }
+      error: (err) => alert("Error: " + (err.error?.message || "Login fallido"))
     });
+  }
+
+  // 👇 Método nuevo para el cliente
+  enterAsClient() {
+    if(!this.barIdInput.trim()) return alert("Por favor, escribe el email del bar.");
+    // Redirige al portal del cliente con el ID en la URL
+    this.router.navigate(['/jukebox', this.barIdInput]);
   }
 }
