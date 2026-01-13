@@ -130,16 +130,23 @@ export class HomeComponent implements OnInit {
   }
 
   formatMs(ms: number | undefined | null): string {
-    if (!ms && ms !== 0) return '0:00';
-    const totalSec = Math.floor((ms || 0) / 1000);
+    if (ms === null || ms === undefined) return '--:--';
+    const totalSec = Math.floor(ms / 1000);
     const m = Math.floor(totalSec / 60);
     const s = totalSec % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
   }
 
   getPlaybackPercent(): number {
-    if (!this.currentPlayback || !this.currentPlayback.progress_ms || !this.currentPlayback.item || !this.currentPlayback.item.duration_ms) return 0;
-    const pct = (this.currentPlayback.progress_ms / this.currentPlayback.item.duration_ms) * 100;
+    if (!this.currentPlayback || !this.currentPlayback.item) return 0;
+
+    // Compatibilidad con distintas serializaciones: intentamos varios nombres
+    const prog = (this.currentPlayback.progress_ms ?? this.currentPlayback.progressMs ?? this.currentPlayback.progress ?? 0) as number;
+    const item = this.currentPlayback.item;
+    const dur = (item.duration_ms ?? item.durationMs ?? item.duration ?? 0) as number;
+
+    if (!dur || dur <= 0) return 0;
+    const pct = (prog / dur) * 100;
     return Math.max(0, Math.min(100, pct));
   }
 

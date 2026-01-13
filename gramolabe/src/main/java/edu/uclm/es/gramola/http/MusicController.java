@@ -5,10 +5,12 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import edu.uclm.es.gramola.dao.UserDao;
 import edu.uclm.es.gramola.model.SelectedTrack;
@@ -60,10 +62,49 @@ public class MusicController {
         return this.service.getPlaylist(userId);
     }
 
+    @PostMapping("/current")
+    public Object current(@RequestBody Map<String, String> info) {
+        // Se puede pasar userId si se quiere validar permisos, por ahora devolvemos reproducción global
+        return this.service.getCurrentPlaybackInfo();
+    }
+
+    @PostMapping("/devices")
+    public Object devices(@RequestBody Map<String, String> info) {
+        return this.service.getAvailableDevices();
+    }
+
+    @GetMapping("/events")
+    public SseEmitter events() {
+        return this.service.subscribeToEvents();
+    }
+
     @PostMapping("/remove")
     public void remove(@RequestBody Map<String, String> info) {
         String userId = info.get("userId");
         String trackId = info.get("trackId");
         this.service.removeTrack(userId, trackId);
+    }
+
+    @PostMapping("/play")
+    public void play() {
+        this.service.play();
+    }
+
+    @PostMapping("/pause")
+    public void pause() {
+        this.service.pause();
+    }
+
+    @PostMapping("/skip")
+    public void skip() {
+        this.service.skipToNext();
+    }
+
+    @PostMapping("/transfer")
+    public void transfer(@RequestBody Map<String, Object> info) {
+        String deviceId = (String) info.get("deviceId");
+        boolean play = false;
+        if (info.containsKey("play")) play = (boolean) info.get("play");
+        this.service.transferPlayback(deviceId, play);
     }
 }
