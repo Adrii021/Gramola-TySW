@@ -11,6 +11,20 @@
       <h2 class="welcome">Estás en: <span style="color:#1db954">{{ barName }}</span> 🍻</h2>
       <p class="subtitle">Pide tu canción favorita</p>
 
+      <!-- Now playing preview -->
+      <div *ngIf="currentPlayback && currentPlayback.item" class="nowplaying-card" style="margin-bottom:18px;">
+        <div class="track">
+          <img *ngIf="currentPlayback.item.album && currentPlayback.item.album.images && currentPlayback.item.album.images.length>0" [src]="currentPlayback.item.album.images[0].url" />
+          <div class="track-info">
+            <div class="track-name">{{ currentPlayback.item.name }}</div>
+            <div class="track-artist" *ngIf="currentPlayback.item.artists && currentPlayback.item.artists.length>0">{{ currentPlayback.item.artists[0].name }}</div>
+            <div style="font-size:0.85rem; color:#9ca3af;">Progreso: {{ currentPlayback.progress_ms }} ms</div>
+          </div>
+          <div style="width:120px; text-align:right; color:#9ca3af;">Cola: {{ queue.length }}</div>
+        </div>
+      </div>
+
+
       <div class="search">
         <input type="text" [(ngModel)]="query" placeholder="Busca tu temazo..." (keyup.enter)="search()" />
         <button class="btn-primary" (click)="search()">Buscar</button>
@@ -42,17 +56,11 @@
     <h3>🎵 Pedir canción</h3>
     <p>¿Cómo quieres que suene <strong>{{ pendingTrack?.name }}</strong>?</p>
     
-    <div class="options" *ngIf="!showStripeForm">
-      <div class="option-card" (click)="addNormal()">
-        <h4>🐢 Normal</h4>
-        <p>Gratis</p>
-        <small>A la cola</small>
-      </div>
-
+    <div class="options" *ngIf="!showStripeForm" style="justify-content:center;">
       <div class="option-card priority" (click)="initiatePriorityPayment()">
-        <h4>🚀 Prioritaria</h4>
+        <h4>Añadir Canción</h4>
         <p class="price">{{ songPrice }} €</p>
-        <small>¡Suena YA!</small>
+        <small>¡Añáde tu canción a la lista!</small>
       </div>
     </div>
 

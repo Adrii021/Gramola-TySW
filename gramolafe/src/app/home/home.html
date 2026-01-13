@@ -44,19 +44,73 @@
           ℹ️ Esta música suena en la App de Spotify del local.
         </p>
 
-        <div *ngIf="playlist.length === 0" class="empty-state">La cola está vacía 😴</div>
-        
-        <div *ngFor="let item of playlist; let i = index">
-          <div class="track">
-            <div class="track-info">
-              <div class="track-name" [class.priority-text]="item.createdAt === 0">
-                <span *ngIf="item.createdAt === 0">🚀 </span>
-                {{ i + 1 }}. {{ item.name }}
+        <div class="section-grid">
+          <div class="section-card nowplaying-card">
+            <h4>Ahora sonando</h4>
+            <div *ngIf="currentPlayback && currentPlayback.item; else noNow" class="now-playing">
+              <div class="track">
+                <img *ngIf="currentPlayback.item.album && currentPlayback.item.album.images && currentPlayback.item.album.images.length>0" [src]="currentPlayback.item.album.images[0].url" />
+                <div class="track-info">
+                  <div class="track-name">{{ currentPlayback.item.name }}</div>
+                  <div class="track-artist" *ngIf="currentPlayback.item.artists && currentPlayback.item.artists.length>0">{{ currentPlayback.item.artists[0].name }}</div>
+                  <div class="progress-row">
+                    <div class="progress-bar">
+                      <div class="progress-filled" [style.width.%]="getPlaybackPercent()"></div>
+                    </div>
+                    <div class="progress-times">{{ formatMs(currentPlayback.progress_ms) }} / {{ formatMs(currentPlayback.item.duration_ms) }}</div>
+                  </div>
+
+                  <div class="controls-row" *ngIf="isOwner()">
+                    <button class="toggle-ctrl" (click)="togglePlay()">
+                      <span *ngIf="currentPlayback?.is_playing; else playIcon">⏸</span>
+                      <ng-template #playIcon>⏵</ng-template>
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div class="track-artist">{{ item.artist }}</div>
             </div>
-            <div class="track-actions">
-              <button class="add-btn" (click)="remove(item.id)">Quitar</button>
+            <ng-template #noNow>
+              <div class="empty-state">No hay reproducción activa.</div>
+            </ng-template>
+          </div>
+
+          <div class="section-card devices-card">
+            <h4>Dispositivos</h4>
+            <div *ngIf="devices && devices.length>0; else noDev">
+              <div *ngFor="let d of devices" class="device-item">
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                  <div>
+                    <div class="device-name">{{ d.name }}</div>
+                    <div class="device-meta">{{ d.type }} <span *ngIf="d.is_active">• activo</span></div>
+                  </div>
+                  <div *ngIf="isOwner()" style="display:flex; gap:8px; align-items:center">
+                    <button class="btn-small" (click)="transferTo(d.id, false)">Transferir (sin play)</button>
+                    <button class="btn-small primary" (click)="transferTo(d.id, true)">Transferir y reproducir</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <ng-template #noDev>
+              <div class="empty-state">No se han detectado dispositivos.</div>
+            </ng-template>
+          </div>
+        </div>
+
+        <div class="section-card queue-card" style="margin-top:18px;">
+          <h4>Lista ({{ playlist.length }})</h4>
+          <div *ngIf="playlist.length === 0" class="empty-state">La cola está vacía 😴</div>
+          <div *ngFor="let item of playlist; let i = index">
+            <div class="track queue-item">
+              <div class="track-info">
+                <div class="track-name" [class.priority-text]="item.createdAt === 0">
+                  <span *ngIf="item.createdAt === 0">🚀 </span>
+                  {{ i + 1 }}. {{ item.name }}
+                </div>
+                <div class="track-artist">{{ item.artist }}</div>
+              </div>
+              <div class="track-actions">
+                <button class="add-btn" (click)="remove(item.id)">Quitar</button>
+              </div>
             </div>
           </div>
         </div>
@@ -91,13 +145,7 @@
     <h3>🎵 Añadir a la cola</h3>
     <p>¿Cómo quieres añadir <strong>{{ pendingTrack?.name }}</strong>?</p>
     
-    <div class="options">
-      <div class="option-card" (click)="addNormal()">
-        <h4>🐢 Normal</h4>
-        <p>Gratis</p>
-        <small>Al final de la cola</small>
-      </div>
-
+    <div class="options" style="justify-content:center;">
       <div class="option-card priority" (click)="addPriority()">
         <h4>🚀 Prioritaria</h4>
         <p class="price">{{ songPrice }} €</p>

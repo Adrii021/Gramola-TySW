@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -17,6 +17,9 @@ export class HomeComponent implements OnInit {
   query: string = "";
   tracks: any[] = [];
   playlist: any[] = [];
+  currentPlayback: any = null;
+  devices: any[] = [];
+  private eventSource: EventSource | null = null;
   
   // Variables de estado
   showingPlaylist: boolean = false;
@@ -41,6 +44,7 @@ export class HomeComponent implements OnInit {
       this.user = JSON.parse(userJson);
       this.barName = this.user.name || this.user.bar || "Usuario"; 
       this.refreshPlaylistData(); 
+      this.startSse();
       
       this.pricingService.getPrices().subscribe(prices => {
         const p = prices.find(x => x.type === 'SONG');
@@ -50,6 +54,93 @@ export class HomeComponent implements OnInit {
     } else {
       this.router.navigate(['/login']);
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+  }
+  startSse() {
+    try {
+      if (this.eventSource) this.eventSource.close();
+      this.eventSource = new EventSource('http://localhost:8080/music/events');
+
+      this.eventSource.addEventListener('state', (e: any) => {
+        try {
+          const payload = JSON.parse(e.data);
+          // current playback
+          this.currentPlayback = payload.current || null;
+          // devices: try common shapes
+          this.devices = (payload.devices && payload.devices.devices) ? payload.devices.devices : (payload.devices || []);
+          // queue: backend sends full queue; filter to current user for "Mi playlist"
+          const queue = payload.queue || [];
+          this.playlist = queue.filter((t: any) => t.userId === this.user.email);
+        } catch (err) {
+          console.error('Error parsing SSE state', err);
+        }
+      });
+
+      this.eventSource.onerror = (err) => {
+        console.error('SSE error', err);
+        // try to reconnect after a short delay
+        if (this.eventSource) {
+          this.eventSource.close();
+          this.eventSource = null;
+        }
+        setTimeout(() => this.startSse(), 3000);
+      };
+    } catch (err) {
+      console.error('Failed to start SSE', err);
+    }
+  }
+
+  isOwner(): boolean {
+    return !!(this.user && this.user.clientId);
+  }
+
+  play() {
+    this.http.post("http://localhost:8080/music/play", {}).subscribe({ next: () => {}, error: e => alert('Error play: ' + e.message) });
+  }
+
+  pause() {
+    this.http.post("http://localhost:8080/music/pause", {}).subscribe({ next: () => {}, error: e => alert('Error pause: ' + e.message) });
+  }
+
+  // Toggle single button: si está reproduciendo -> pausar, si no -> reproducir
+  togglePlay() {
+    const playing = !!(this.currentPlayback && this.currentPlayback.is_playing);
+    if (playing) {
+      this.pause();
+    } else {
+      this.play();
+    }
+  }
+
+  skip() {
+    // Mantengo método por compatibilidad pero UI no lo mostrará
+    if(!confirm('¿Saltar a la siguiente pista de la cola?')) return;
+    this.http.post("http://localhost:8080/music/skip", {}).subscribe({ next: () => {}, error: e => alert('Error skip: ' + e.message) });
+  }
+
+  transferTo(deviceId: string, play: boolean) {
+    const body = { deviceId: deviceId, play: play };
+    this.http.post("http://localhost:8080/music/transfer", body).subscribe({ next: () => {}, error: e => alert('Error transfer: ' + e.message) });
+  }
+
+  formatMs(ms: number | undefined | null): string {
+    if (!ms && ms !== 0) return '0:00';
+    const totalSec = Math.floor((ms || 0) / 1000);
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  getPlaybackPercent(): number {
+    if (!this.currentPlayback || !this.currentPlayback.progress_ms || !this.currentPlayback.item || !this.currentPlayback.item.duration_ms) return 0;
+    const pct = (this.currentPlayback.progress_ms / this.currentPlayback.item.duration_ms) * 100;
+    return Math.max(0, Math.min(100, pct));
   }
 
   logout() {
@@ -74,6 +165,13 @@ export class HomeComponent implements OnInit {
       if(this.user.creationToken.id) window.location.href = '/payment?token=' + this.user.creationToken.id;
       return;
     }
+    // Si el usuario es el propietario (tiene clientId), puede añadir gratis directamente
+    if (this.user && this.user.clientId) {
+      this.processAdd(track, false);
+      return;
+    }
+
+    // Para clientes normales mostramos el modal de pago/opciones
     this.pendingTrack = track;
     this.showPaymentModal = true;
   }

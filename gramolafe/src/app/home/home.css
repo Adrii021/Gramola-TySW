@@ -133,6 +133,47 @@
   margin-bottom: 15px;
 }
 
+/* New layout helpers */
+.section-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 18px;
+}
+
+.section-card {
+  background: rgba(6, 8, 20, 0.7);
+  border: 1px solid #111827;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.nowplaying-card h4, .devices-card h4, .queue-card h4 { margin: 0 0 12px 0; color:#e5e7eb }
+
+.now-playing .track { padding: 8px; background: transparent; border: none; }
+.device-item { padding: 8px 6px; border-bottom: 1px dashed rgba(255,255,255,0.03); }
+.device-name { color: #e5e7eb; font-weight:600 }
+.device-meta { color: #9ca3af; font-size:0.82rem }
+
+.queue-card .queue-item { background: rgba(2,6,23,0.5); border: 1px solid rgba(17,24,39,0.6); margin-bottom:10px; }
+
+/* Responsive */
+@media (max-width: 880px) {
+  .section-grid { grid-template-columns: 1fr; }
+}
+
+/* Progress bar */
+.progress-row { margin-top: 8px; display:flex; align-items:center; gap:12px; }
+.progress-bar { flex: 1; height: 8px; background: rgba(255,255,255,0.03); border-radius: 8px; overflow: hidden; border: 1px solid rgba(255,255,255,0.02); }
+.progress-filled { height: 100%; background: linear-gradient(90deg, #1db954, #6ee7b7); width: 0%; transition: width 0.4s linear; }
+.progress-times { color:#9ca3af; font-size:0.85rem; min-width:88px; text-align:right }
+
+/* Controls */
+.controls-row { margin-top:10px; display:flex; gap:10px; }
+.toggle-ctrl { background: linear-gradient(90deg,#1db954,#6ee7b7); color: #04121a; padding:10px 14px; border-radius:12px; border:none; cursor:pointer; font-size:1.05rem; box-shadow: 0 6px 16px rgba(27, 128, 80, 0.18); }
+.toggle-ctrl:hover { transform: translateY(-1px); }
+.btn-small { padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04); cursor:pointer }
+.btn-small.primary { background: linear-gradient(90deg,#1db954,#6ee7b7); color:#051019; border:none }
+
 /* ===============================
    Track item
    =============================== */

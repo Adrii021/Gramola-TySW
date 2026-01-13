@@ -31,6 +31,10 @@ export class ClientComponent implements OnInit {
   card: any;
   clientSecret: string = "";
   processing: boolean = false;
+  // SSE and playback
+  currentPlayback: any = null;
+  queue: any[] = [];
+  private eventSource: EventSource | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -58,6 +62,9 @@ export class ClientComponent implements OnInit {
       const p = prices.find(x => x.type === 'SONG');
       if (p) this.songPrice = p.price;
     });
+
+    // Start SSE to receive now-playing and queue updates
+    this.startSse();
   }
 
   exit() {
@@ -80,6 +87,33 @@ export class ClientComponent implements OnInit {
     this.pendingTrack = track;
     this.showPaymentModal = true;
     this.showStripeForm = false; // Resetear vista
+  }
+
+  startSse() {
+    try {
+      if (this.eventSource) this.eventSource.close();
+      this.eventSource = new EventSource('http://localhost:8080/music/events');
+
+      this.eventSource.addEventListener('state', (e: any) => {
+        try {
+          const payload = JSON.parse(e.data);
+          this.currentPlayback = payload.current || null;
+          const fullQueue = payload.queue || [];
+          // filter queue for this bar (barId corresponds to userId stored in SelectedTrack)
+          this.queue = fullQueue.filter((t: any) => t.userId === this.barId);
+        } catch (err) {
+          console.error('Error parsing SSE state', err);
+        }
+      });
+
+      this.eventSource.onerror = (err) => {
+        console.error('SSE error', err);
+        if (this.eventSource) { this.eventSource.close(); this.eventSource = null; }
+        setTimeout(() => this.startSse(), 3000);
+      };
+    } catch (err) {
+      console.error('Failed to start SSE', err);
+    }
   }
 
   closeModal() {
