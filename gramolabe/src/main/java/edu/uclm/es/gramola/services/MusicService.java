@@ -107,12 +107,30 @@ public class MusicService {
 
     private void broadcastState() {
         Map<String, Object> state = buildStateSnapshot();
-        for (SseEmitter emitter : this.emitters) {
-            try {
-                emitter.send(SseEmitter.event().name("state").data(state));
-            } catch (Exception e) {
-                this.emitters.remove(emitter);
+        // Iterate over a copy to avoid concurrent modification issues and ensure
+        // that failures on individual emitters don't break the whole loop.
+        try {
+            for (SseEmitter emitter : this.emitters) {
+                try {
+                    emitter.send(SseEmitter.event().name("state").data(state));
+                } catch (java.io.IOException ioe) {
+                    // Client disconnected or network error - clean up this emitter
+                    try {
+                        emitter.complete();
+                    } catch (Exception ignore) {}
+                    this.emitters.remove(emitter);
+                } catch (Exception e) {
+                    // Any other error: remove emitter to be safe
+                    try {
+                        emitter.completeWithError(e);
+                    } catch (Exception ignore) {}
+                    this.emitters.remove(emitter);
+                }
             }
+        } catch (Exception ex) {
+            // Defensive: ensure broadcastState never throws
+            System.err.println("⚠️ broadcastState unexpected error: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -187,6 +205,29 @@ public class MusicService {
 
             System.out.println("⏱️ progress=" + progress + "ms duration=" + duration + "ms timeLeft=" + timeLeft + "ms matchIndex=" + matchIndex);
 
+            // Si la canción actual pertenece a nuestra cola y ya ha terminado,
+            // la eliminamos de la base de datos para mantener la cola limpia.
+            if (matchIndex >= 0 && timeLeft <= 500) {
+                System.out.println("✅ La pista ha terminado — eliminando de BD: " + playingId);
+                try {
+                    List<SelectedTrack> refreshed = getSortedTracks();
+                    for (SelectedTrack t : refreshed) {
+                        if (playingId != null && playingId.equals(t.getSpotifyId())) {
+                            this.trackDao.delete(t);
+                            break;
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.err.println("⚠️ Error eliminando pista finalizada: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+                // Actualizamos lastPlayingId para evitar confusiones en la siguiente iteración
+                this.lastPlayingId = null;
+                // Emitir estado y salir para que el siguiente tick lo recoja
+                try { this.broadcastState(); } catch (Exception ignore) {}
+                return;
+            }
+
             // Enviamos la siguiente SI quedan menos de 20s para el final
             if (timeLeft < 20000) {
                 System.out.println("ℹ️ Quedan <20s en la pista actual — intentando enviar siguiente.");
@@ -241,7 +282,11 @@ public class MusicService {
             this.refreshAccessToken();
             try {
                 return List.of(this.spotifyApi.searchTracks(query).build().execute().getItems());
-            } catch (Exception ex) { throw new RuntimeException("Error búsqueda", ex); }
+            } catch (Exception ex) {
+                System.err.println("⚠️ searchTracks failed for query='" + query + "' - returning empty list. Error: " + ex.getMessage());
+                ex.printStackTrace();
+                return List.of();
+            }
         }
     }
 

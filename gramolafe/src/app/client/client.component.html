@@ -18,7 +18,16 @@
           <div class="track-info">
             <div class="track-name">{{ currentPlayback.item.name }}</div>
             <div class="track-artist" *ngIf="currentPlayback.item.artists && currentPlayback.item.artists.length>0">{{ currentPlayback.item.artists[0].name }}</div>
-            <div style="font-size:0.85rem; color:#9ca3af;">Progreso: {{ currentPlayback.progress_ms }} ms</div>
+            <div style="font-size:0.85rem; color:#9ca3af; margin-top:8px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="flex:1;height:8px;background:#172029;border-radius:6px;overflow:hidden;">
+                  <div [style.width.%]="getPlaybackPercent()" style="height:100%;background:#1db954;border-radius:6px 0 0 6px;"></div>
+                </div>
+                <div style="min-width:90px;text-align:right;color:#9ca3af;font-size:0.85rem;">
+                  {{ formatMs(getProgressMs()) }} / {{ formatMs(getDurationMs()) }}
+                </div>
+              </div>
+            </div>
           </div>
           <div style="width:120px; text-align:right; color:#9ca3af;">Cola: {{ queue.length }}</div>
         </div>

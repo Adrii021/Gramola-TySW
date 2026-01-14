@@ -1,34 +1,44 @@
 <div class="auth">
-  <div class="auth-card">
-    <h2>Bienvenido de nuevo </h2>
-    <p class="subtitle">Gestiona la música de tu bar</p>
+  <div class="auth-grid">
+    <div class="auth-card owner-card">
+      <div class="card-head">
+        <div class="badge owner">Propietario</div>
+        <h2>Bienvenido de nuevo</h2>
+        <p class="subtitle">Accede con tu cuenta de dueño para gestionar la gramola</p>
+      </div>
 
-    <div class="field">
-      <label for="email">Correo electrónico</label>
-      <input type="email" [(ngModel)]="email" name="email" placeholder="tu@email.com" class="input-modern"/>
-    </div>
-    <div class="field">
-      <label for="pwd">Contraseña</label>
-      <input type="password" [(ngModel)]="pwd" name="pwd" placeholder="Tu contraseña" class="input-modern"/>
-    </div>
-    <div class="forgot-pass">
-        <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
-    </div>
-    <button class="btn-primary" (click)="login()">Iniciar sesión</button>
+      <div class="field">
+        <label for="email">Correo electrónico</label>
+        <input type="email" [(ngModel)]="email" name="email" placeholder="tu@bar.com" class="input-modern"/>
+      </div>
+      <div class="field">
+        <label for="pwd">Contraseña</label>
+        <input type="password" [(ngModel)]="pwd" name="pwd" placeholder="Tu contraseña" class="input-modern"/>
+      </div>
+      <div class="forgot-pass">
+          <a routerLink="/forgot-password">¿Olvidaste tu contraseña?</a>
+      </div>
+      <button class="btn-primary" (click)="login()">Iniciar sesión</button>
 
-    <div class="auth-footer">
-      <span>¿No tienes cuenta?</span>
-      <a routerLink="/register">Regístrate</a>
+      <div class="auth-footer">
+        <span>¿No tienes cuenta?</span>
+        <a routerLink="/register">Regístrate</a>
+      </div>
     </div>
-  </div>
 
-  <div class="auth-card client-access">
-    <h3>🎸 Acceso Clientes</h3>
-    <p class="subtitle" style="margin-bottom:15px;">¿Estás en un bar? Pon su email para pedir música.</p>
-    
-    <div class="client-search">
-        <input type="text" [(ngModel)]="barIdInput" placeholder="Email del bar (ej: bar@test.com)" />
-        <button class="btn-secondary" (click)="enterAsClient()">Entrar</button>
-    </div>
+    <aside class="auth-card client-access">
+      <div class="card-head">
+        <div class="badge client">Clientes</div>
+        <h3>Acceso Clientes</h3>
+        <p class="subtitle">Pide música desde tu móvil sin acceder como propietario</p>
+      </div>
+
+      <div class="client-search">
+          <input type="text" [(ngModel)]="barIdInput" placeholder="Email del bar (ej: bar@test.com)" />
+          <button class="btn-secondary" (click)="enterAsClient()">Entrar</button>
+      </div>
+
+      <p class="client-hint">Si sólo quieres ver la canción que suena y pedir, usa este acceso.</p>
+    </aside>
   </div>
 </div>

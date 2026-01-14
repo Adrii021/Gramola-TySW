@@ -20,6 +20,10 @@
   animation: fadeUp 0.6s ease-out both;
 }
 
+.auth-grid { display:flex; gap:28px; align-items:flex-start; max-width:1100px; width:100%; padding: 20px; }
+.owner-card { flex: 1 1 640px; max-width:720px; }
+.client-access { flex: 0 0 360px; max-width:360px; }
+
 h2 {
   text-align: center;
   color: #e5e7eb;
@@ -93,6 +97,11 @@ input:focus {
   color: #9ca3af;
 }
 
+.card-head { margin-bottom: 18px; position:relative }
+.badge { position:absolute; right:0; top:-10px; padding:6px 10px; border-radius:999px; font-weight:700; font-size:0.78rem }
+.badge.owner { background: linear-gradient(90deg,#7dd3fc,#60a5fa); color:#041029 }
+.badge.client { background: rgba(29,185,84,0.12); color:#1db954; border:1px solid rgba(29,185,84,0.18) }
+
 .auth-footer a {
   margin-left: 6px;
   color: #1db954;
@@ -129,21 +138,25 @@ input:focus {
 }
 .client-access {
   margin-top: 25px;
-  border: 1px solid #1db954; /* Borde verde para diferenciar */
-  background: rgba(29, 185, 84, 0.05); /* Fondo verde muy sutil */
-  padding: 30px;
+  margin-top: 0;
+  border: 1px solid rgba(29,185,84,0.12); /* Borde suave */
+  background: linear-gradient(180deg, rgba(29,185,84,0.02), rgba(255,255,255,0.0));
+  padding: 28px;
 }
 
 .client-access h3 {
-  text-align: center;
-  color: #1db954;
-  margin-top: 0;
+  text-align: left;
+  color: #e6fdf0;
+  margin-top: 2px;
+  margin-bottom: 6px;
 }
 
 .client-search {
   display: flex;
   gap: 10px;
 }
+
+.client-hint { color:#9ca3af; font-size:0.85rem; margin-top:12px }
 
 .btn-secondary {
   background: transparent;
@@ -159,4 +172,11 @@ input:focus {
 .btn-secondary:hover {
   background: #1db954;
   color: black;
+}
+
+@media (max-width: 880px) {
+  .auth-grid { flex-direction: column; padding: 12px }
+  .client-access { order: 2; max-width:100%; width:100% }
+  .owner-card { order: 1; max-width:100%; }
+  .badge { position: static; display:inline-block; margin-bottom:10px }
 }

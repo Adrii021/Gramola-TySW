@@ -54,10 +54,14 @@
                   <div class="track-name">{{ currentPlayback.item.name }}</div>
                   <div class="track-artist" *ngIf="currentPlayback.item.artists && currentPlayback.item.artists.length>0">{{ currentPlayback.item.artists[0].name }}</div>
                   <div class="progress-row">
-                    <div class="progress-bar">
-                      <div class="progress-filled" [style.width.%]="getPlaybackPercent()"></div>
+                    <div style="display:flex;align-items:center;gap:10px;width:100%;">
+                      <div style="flex:1;height:8px;background:#172029;border-radius:6px;overflow:hidden;">
+                        <div [style.width.%]="getPlaybackPercent()" style="height:100%;background:#1db954;border-radius:6px 0 0 6px;"></div>
+                      </div>
+                      <div style="min-width:90px;text-align:right;color:#9ca3af;font-size:0.85rem;">
+                        {{ formatMs(getProgressMs()) }} / {{ formatMs(getDurationMs()) }}
+                      </div>
                     </div>
-                    <div class="progress-times">{{ formatMs(currentPlayback.progress_ms) }} / {{ formatMs(currentPlayback.item.duration_ms) }}</div>
                   </div>
 
                   <div class="controls-row" *ngIf="isOwner()">

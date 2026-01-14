@@ -98,6 +98,8 @@ export class ClientComponent implements OnInit {
         try {
           const payload = JSON.parse(e.data);
           this.currentPlayback = payload.current || null;
+          // debug: log incoming playback shape to help detect field names
+          try { console.debug('SSE currentPlayback snapshot', this.currentPlayback); } catch (err) {}
           const fullQueue = payload.queue || [];
           // filter queue for this bar (barId corresponds to userId stored in SelectedTrack)
           this.queue = fullQueue.filter((t: any) => t.userId === this.barId);
@@ -114,6 +116,42 @@ export class ClientComponent implements OnInit {
     } catch (err) {
       console.error('Failed to start SSE', err);
     }
+  }
+
+  // Helpers para la barra de progreso y formateo de tiempo
+  formatMs(ms: any): string {
+    if (ms === null || ms === undefined) return '--:--';
+    let n = Number(ms);
+    if (isNaN(n) || n < 0) return '--:--';
+    const total = Math.floor(n / 1000);
+    const mm = Math.floor(total / 60);
+    const ss = total % 60;
+    return `${mm}:${ss < 10 ? '0' + ss : ss}`;
+  }
+
+  getPlaybackPercent(): number {
+    try {
+      if (!this.currentPlayback || !this.currentPlayback.item) return 0;
+      const dur = Number(this.getDurationMs() || 0);
+      const prog = Number(this.getProgressMs() || 0);
+      if (!dur || dur <= 0) return 0;
+      const pct = Math.round((prog / dur) * 100);
+      return Math.min(100, Math.max(0, pct));
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  getProgressMs(): number {
+    if (!this.currentPlayback) return 0;
+    // try common names
+    return Number(this.currentPlayback.progress_ms ?? this.currentPlayback.progress ?? this.currentPlayback.progressMs ?? 0);
+  }
+
+  getDurationMs(): number {
+    if (!this.currentPlayback || !this.currentPlayback.item) return 0;
+    const item = this.currentPlayback.item;
+    return Number(item.duration_ms ?? item.duration ?? item.durationMs ?? 0);
   }
 
   closeModal() {

@@ -12,7 +12,7 @@ import { PricingService } from '../services/pricing.service';
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   barName: string = "Usuario";
   query: string = "";
   tracks: any[] = [];
@@ -21,6 +21,9 @@ export class HomeComponent implements OnInit {
   devices: any[] = [];
   private eventSource: EventSource | null = null;
   
+  // 👇 NUEVA VARIABLE: Timer para simular el avance de la barra
+  private progressTimer: any = null;
+
   // Variables de estado
   showingPlaylist: boolean = false;
   showingSettings: boolean = false; 
@@ -51,6 +54,9 @@ export class HomeComponent implements OnInit {
         if(p) this.songPrice = p.price;
       });
 
+      // 👇 INICIAMOS EL TIMER LOCAL
+      this.startProgressTimer();
+
     } else {
       this.router.navigate(['/login']);
     }
@@ -61,7 +67,39 @@ export class HomeComponent implements OnInit {
       this.eventSource.close();
       this.eventSource = null;
     }
+    // 👇 LIMPIEZA: Detenemos el timer al salir para evitar fugas de memoria
+    if (this.progressTimer) {
+      clearInterval(this.progressTimer);
+    }
   }
+
+  // 👇 NUEVO MÉTODO: Timer que avanza la barra suavemente
+  startProgressTimer() {
+    // Se ejecuta cada 1000ms (1 segundo)
+    this.progressTimer = setInterval(() => {
+      // Solo avanzamos si hay música sonando
+      if (this.currentPlayback && this.currentPlayback.is_playing && this.currentPlayback.item) {
+        
+        // 1. Obtener duración total (intentando varios nombres por compatibilidad)
+        const item = this.currentPlayback.item;
+        const duration = (item.duration_ms ?? item.durationMs ?? item.duration ?? 0);
+
+        // 2. Obtener progreso actual
+        let currentProgress = (this.currentPlayback.progress_ms ?? this.currentPlayback.progressMs ?? this.currentPlayback.progress ?? 0);
+
+        // 3. Si no ha terminado, sumamos 1000ms
+        if (currentProgress < duration) {
+          const newProgress = currentProgress + 1000;
+          
+          // Actualizamos todas las posibles propiedades para que la vista lo detecte
+          this.currentPlayback.progress_ms = newProgress;
+          this.currentPlayback.progressMs = newProgress;
+          this.currentPlayback.progress = newProgress;
+        }
+      }
+    }, 1000);
+  }
+
   startSse() {
     try {
       if (this.eventSource) this.eventSource.close();
@@ -71,7 +109,10 @@ export class HomeComponent implements OnInit {
         try {
           const payload = JSON.parse(e.data);
           // current playback
+          // 👇 AL RECIBIR DATO REAL, SE SOBRESCRIBE LA SIMULACIÓN (Sync automático)
           this.currentPlayback = payload.current || null;
+          try { console.debug('SSE currentPlayback snapshot', this.currentPlayback); } catch (err) {}
+          
           // devices: try common shapes
           this.devices = (payload.devices && payload.devices.devices) ? payload.devices.devices : (payload.devices || []);
           // queue: backend sends full queue; filter to current user for "Mi playlist"
@@ -138,16 +179,27 @@ export class HomeComponent implements OnInit {
   }
 
   getPlaybackPercent(): number {
+    try {
+      if (!this.currentPlayback || !this.currentPlayback.item) return 0;
+      const dur = Number(this.getDurationMs() || 0);
+      const prog = Number(this.getProgressMs() || 0);
+      if (!dur || dur <= 0) return 0;
+      const pct = Math.round((prog / dur) * 100);
+      return Math.min(100, Math.max(0, pct));
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  getProgressMs(): number {
+    if (!this.currentPlayback) return 0;
+    return Number(this.currentPlayback.progress_ms ?? this.currentPlayback.progress ?? this.currentPlayback.progressMs ?? 0);
+  }
+
+  getDurationMs(): number {
     if (!this.currentPlayback || !this.currentPlayback.item) return 0;
-
-    // Compatibilidad con distintas serializaciones: intentamos varios nombres
-    const prog = (this.currentPlayback.progress_ms ?? this.currentPlayback.progressMs ?? this.currentPlayback.progress ?? 0) as number;
     const item = this.currentPlayback.item;
-    const dur = (item.duration_ms ?? item.durationMs ?? item.duration ?? 0) as number;
-
-    if (!dur || dur <= 0) return 0;
-    const pct = (prog / dur) * 100;
-    return Math.max(0, Math.min(100, pct));
+    return Number(item.duration_ms ?? item.duration ?? item.durationMs ?? 0);
   }
 
   logout() {
