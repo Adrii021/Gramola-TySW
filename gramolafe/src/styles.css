@@ -4,6 +4,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  width: 100%;
 }
 
 body {
@@ -13,8 +14,33 @@ body {
   color: #e5e7eb;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 button {
   font-family: inherit;
+}
+
+/* Responsive base styles */
+* {
+  box-sizing: border-box;
+}
+
+/* Mobile-first approach */
+@media (max-width: 480px) {
+  html, body {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  html, body {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 769px) {
+  html, body {
+    font-size: 16px;
+  }
 }

@@ -21,8 +21,8 @@
   width: 100%;
   max-width: 420px;
   background: rgba(2, 6, 23, 0.88);
-  padding: 50px 45px;
-  border-radius: 22px;
+  padding: clamp(30px, 5vw, 50px) clamp(20px, 4vw, 45px);
+  border-radius: clamp(16px, 3vw, 22px);
   box-shadow: 0 30px 60px rgba(0,0,0,.55);
   backdrop-filter: blur(12px);
   animation: fadeUp 0.6s ease-out both;
@@ -35,7 +35,7 @@
 h2 {
   text-align: center;
   color: #e5e7eb;
-  font-size: 1.8rem;
+  font-size: clamp(1.4rem, 5vw, 1.8rem);
   margin-bottom: 12px;
 }
 
@@ -47,7 +47,7 @@ h2 {
   display: block;
   width: fit-content;
   margin: 0 auto 18px;
-  padding: 6px 14px;
+  padding: clamp(4px, 1vw, 6px) clamp(10px, 2vw, 14px);
   border-radius: 999px;
   background: rgba(34,197,94,0.15);
   color: #22c55e;
@@ -62,19 +62,20 @@ h2 {
 
 .price {
   text-align: center;
-  margin: 25px 0 30px;
+  margin: clamp(15px, 3vw, 25px) 0 clamp(20px, 3vw, 30px);
 }
 
 .amount {
   display: block;
-  font-size: 2.2rem;
+  font-size: clamp(1.8rem, 6vw, 2.2rem);
   font-weight: 700;
   color: #e5e7eb;
 }
 
 .desc {
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   color: #9ca3af;
+  margin-top: 6px;
 }
 
 /* ===============================
@@ -88,15 +89,76 @@ h2 {
   border: none;
   padding: 14px;
   border-radius: 999px;
-  font-size: 1rem;
+  font-size: clamp(0.95rem, 2vw, 1rem);
   font-weight: 600;
   cursor: pointer;
-  transition: transform .2s ease, box-shadow .2s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 30px rgba(29,185,84,.35);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* ===============================
+   Animación
+   =============================== */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===============================
+   Responsive Breakpoints
+   =============================== */
+
+@media (max-width: 480px) {
+  .auth {
+    padding: 15px;
+  }
+
+  .auth-card {
+    padding: 25px 15px;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+
+  .amount {
+    font-size: 1.8rem;
+  }
+
+  .btn-primary {
+    padding: 12px;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .auth-card {
+    padding: 35px 25px;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (min-width: 769px) {
+  .auth-card {
+    max-width: 420px;
+  }
 }
 
 /* ===============================
