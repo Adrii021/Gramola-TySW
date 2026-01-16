@@ -686,3 +686,43 @@
     flex-direction: row;
   }
 }
+/* ===============================
+   MEDIA QUERIES (ADAPTIVE)
+   =============================== */
+
+/* CAMBIO TEMPORAL: 
+   Ponemos max-width: 5000px (en vez de 480px) 
+   para forzar la vista móvil en tu pantalla de escritorio.
+*/
+@media (max-width: 5000px) { 
+  
+  .home {
+    padding: 10px; /* Padding reducido de móvil */
+  }
+  
+  /* Forzar que el grid sea de 1 sola columna (como en el móvil) */
+  .section-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Ocultar botones secundarios si los hubiera */
+  .btn-small:not(:first-child) {
+    display: none;
+  }
+
+  /* Alinear elementos verticalmente */
+  .device-item > div {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  
+  /* Ajustar la barra de búsqueda para que ocupe todo el ancho */
+  .search {
+    flex-direction: column;
+  }
+  
+  .search input {
+    width: 100%;
+  }
+}
+
